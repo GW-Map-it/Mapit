@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/google_login"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Google Login"
+        android:onClick="myClick"/>
+
+    <Button
+        android:id="@+id/kakao_login"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Kakao Login"
+        android:onClick="myClick"/>
+
+    <Button
+        android:id="@+id/db_connect"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="DB Connect"
+        android:onClick="myClick"/>
+
+    <Button
+        android:id="@+id/pixel"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Pixel"
+        android:onClick="myClick"/>
+
+    <Button
+        android:id="@+id/main_map"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Main Map"
+        android:onClick="myClick"/>
+
+</LinearLayout>

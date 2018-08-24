@@ -18,8 +18,12 @@ public class MainActivity extends Activity {
     public void myClick(View v) {
         Intent goIntent = null;
 
+        //Main Login
+        if(v.getId() == R.id.main_login) {
+            goIntent = new Intent(this, LoginActivity.class);
+        }
         //Google Login
-        if(v.getId() == R.id.google_login) {
+        else if(v.getId() == R.id.google_login) {
             goIntent = new Intent(this, GoogleLoginActivity.class);
         }
         //Kakao Login

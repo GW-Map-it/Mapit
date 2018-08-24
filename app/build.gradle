@@ -9,7 +9,8 @@ android {
             keyAlias 'my_keystore'
             keyPassword 'keystore9074'
             //수정(개인 프로젝트의 Mapit폴더 안)
-            storeFile file('C:/Users/SUN_h/AndroidStudioProjects/Mapit/app/my_keystore.keystore')
+            //storeFile file('C:/Users/SUN_h/AndroidStudioProjects/Mapit/app/my_keystore.keystore')
+            storeFile file('D:/Mapit-master (1)/Mapit-master/app/my_keystore.keystore')
             storePassword 'keystore9074'
         }
     }

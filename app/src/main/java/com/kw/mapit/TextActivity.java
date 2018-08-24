@@ -69,7 +69,7 @@ public class TextActivity extends AppCompatActivity {
                         EditText_HashTag.setText("");
 
                         //hashtag 카운팅
-                        getData("http://192.168.0.4/selectHashtag.php");
+                        getData("http://172.30.1.27/selectHashtag.php");
 
                         Intent intent;
                         intent = new Intent(TextActivity.this, DbConnectActivity.class);
@@ -98,7 +98,7 @@ public class TextActivity extends AppCompatActivity {
 
             String hashtag = (String)params[0];
 
-            String serverURL = "http://192.168.0.4/insertData.php";
+            String serverURL = "http://172.30.1.27/insertData.php";
 
             try{
                 URL url = new URL(serverURL);

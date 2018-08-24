@@ -9,6 +9,13 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/main_login"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Main Login"
+        android:onClick="myClick"/>
+
+    <Button
         android:id="@+id/google_login"
         android:layout_width="250dp"
         android:layout_height="wrap_content"

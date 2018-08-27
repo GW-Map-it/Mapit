@@ -28,7 +28,8 @@
         <activity android:name=".KakaoLoginActivity" />
         <activity android:name=".DbConnectActivity" />
         <activity android:name=".TextActivity" />
-        <activity android:name=".PixelActivity"></activity>
+        <activity android:name=".PixelActivity" />
+        <activity android:name=".InputDataActivity"></activity>
     </application>
 
 </manifest>

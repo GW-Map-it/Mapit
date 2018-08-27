@@ -90,9 +90,10 @@
     <Button
         android:id="@+id/btn_sign_in"
         android:layout_width="270dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:background="#ffffff"
-        android:text="회원가입"/>
+        android:text="회원가입"
+        android:onClick="onClick"/>
 
 
 </LinearLayout>

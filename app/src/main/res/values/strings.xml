@@ -3,4 +3,8 @@
 
     <!-- Kakao Login -->
     <string name="kakao_app_key">a2e37856d8dd1758d2b30d7a3179576c</string>
+
+    <!-- IP -->
+    <string name="ip">172.30.1.52</string>
+
 </resources>

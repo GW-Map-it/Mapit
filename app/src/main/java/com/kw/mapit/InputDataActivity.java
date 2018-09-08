@@ -147,7 +147,7 @@ public class InputDataActivity extends AppCompatActivity {
 
             String hashtag = (String)params[0];
 
-            String serverURL = "http://172.30.1.52/insertUserData.php";
+            String serverURL = "http://" + getString(R.string.ip) + "/insertUserData.php";
 
             try{
                 URL url = new URL(serverURL);

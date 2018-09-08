@@ -96,7 +96,7 @@ public class TextActivity extends AppCompatActivity {
 
             String hashtag = (String)params[0];
 
-            String serverURL = "http://172.30.1.52/insertData.php";
+            String serverURL = "http://" + getString(R.string.ip) + "/insertData.php";
 
             try{
                 URL url = new URL(serverURL);

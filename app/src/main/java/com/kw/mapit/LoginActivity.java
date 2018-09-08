@@ -164,7 +164,7 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
         @Override
         protected String doInBackground(String... params) {
 
-            String serverURL = "http://172.30.1.52/selectUserData.php";
+            String serverURL = "http://" + getString(R.string.ip) + "/selectUserData.php";
 
             try{
                 URL url = new URL(serverURL);

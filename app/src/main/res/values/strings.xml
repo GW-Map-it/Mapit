@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Mapit</string>
+
+    <!-- Kakao Login -->
+    <string name="kakao_app_key">a2e37856d8dd1758d2b30d7a3179576c</string>
 </resources>

@@ -60,20 +60,18 @@ public class TextActivity extends AppCompatActivity {
                         String hashtag = EditText_HashTag.getText().toString();
                         sbParams = new StringBuffer();
                         sbParams.append("hashtag=").append(hashtag);
-                        sbParams.append("&").append("latitude=").append(latitude);
                         sbParams.append("&").append("longitude=").append(longitude);
+                        sbParams.append("&").append("latitude=").append(latitude);
 
                         InsertData task = new InsertData();
                         task.execute(hashtag);
 
                         EditText_HashTag.setText("");
 
-                        //hashtag 카운팅
-                        getData("http://172.30.1.27/selectHashtag.php");
-
                         Intent intent;
                         intent = new Intent(TextActivity.this, DbConnectActivity.class);
                         startActivity(intent);
+                        TextActivity.this.finish();
                     }
                 }
         );
@@ -98,7 +96,7 @@ public class TextActivity extends AppCompatActivity {
 
             String hashtag = (String)params[0];
 
-            String serverURL = "http://172.30.1.27/insertData.php";
+            String serverURL = "http://172.30.1.52/insertData.php";
 
             try{
                 URL url = new URL(serverURL);

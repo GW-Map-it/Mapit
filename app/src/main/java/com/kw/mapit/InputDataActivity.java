@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -18,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 public class InputDataActivity extends AppCompatActivity {
 
@@ -28,8 +32,8 @@ public class InputDataActivity extends AppCompatActivity {
     EditText loginId;
     EditText loginPassword;
     EditText loginEmail;
-    EditText loginSex;
     EditText loginAge;
+    RadioGroup loginSex;
 
     String userName;
     String userPassword;
@@ -46,26 +50,42 @@ public class InputDataActivity extends AppCompatActivity {
         userName = getIntent.getStringExtra("USERNAME");
         userEmail = getIntent.getStringExtra("USEREMAIL");
 
-        loginId = (EditText)findViewById(R.id.ed_api_signin_id);
-        loginPassword = (EditText)findViewById(R.id.ed_api_signin_password);
-        loginSex = (EditText)findViewById(R.id.ed_api_signin_sex);
-        loginAge = (EditText)findViewById(R.id.ed_api_signin_age);
-        loginEmail = (EditText)findViewById(R.id.ed_api_signin_email);
+        loginId = (EditText) findViewById(R.id.ed_api_signin_id);
+        loginPassword = (EditText) findViewById(R.id.ed_api_signin_password);
+        loginSex = (RadioGroup) findViewById(R.id.rg_sex);
+        loginAge = (EditText) findViewById(R.id.ed_api_signin_age);
+        loginEmail = (EditText) findViewById(R.id.ed_api_signin_email);
 
         loginId.setText(userName);
         loginEmail.setText(userEmail);
 
-        //tv_signIn = (TextView)findViewById(R.id.tv_signIn);
-        //tv_signIn.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/08seoulnamsanm.ttf"));
+        //Intent로 사용자 아이디 불러오기
+        Intent nameIntent = getIntent();
+        if (nameIntent != null) {
+            String name = nameIntent.getStringExtra("NAME");
+
+            loginId.setText(name);
+
+        }
     }
 
-    public void onClick(View v) {
+    public void onClick(View v) throws ExecutionException, InterruptedException {
         if(v.getId() == R.id.btn_sign_in)
         {
             //EditText에서 정보 받아오기
             userName = loginId.getText().toString();
             userPassword = loginPassword.getText().toString();
-            userSex = loginSex.getText().toString();
+            int radioId = loginSex.getCheckedRadioButtonId();
+            RadioButton rb = (RadioButton)findViewById(radioId);
+            if(rb.getText().toString().equals("Male"))
+            {
+                userSex = "M";
+            }
+            else if(rb.getText().toString().equals("Female"))
+            {
+                userSex = "F";
+            }
+
             try{
                 userAge = Integer.parseInt(loginAge.getText().toString());
             }
@@ -85,16 +105,26 @@ public class InputDataActivity extends AppCompatActivity {
             sbParams.append("&").append("email=").append(userEmail);
 
             InsertData task = new InsertData();
-            task.execute(userName);
+            String result = task.execute(userName).get();
+
+            //DB에 사용자 정보 저장 성공 시
+            if(result.contains("success")) {
+                Toast.makeText(getApplicationContext(), "Map it에 오신 것을 환영합니다:)", Toast.LENGTH_LONG);
+            }
+            //DB에 사용자 정보 저장 실패 시
+            else {
+                Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다:(", Toast.LENGTH_LONG);
+            }
 
             loginId.setText("");
             loginPassword.setText("");
-            loginSex.setText("");
+            rb.setSelected(false);
             loginAge.setText("");
             loginEmail.setText("");
 
-            //DbConnectActivity로 이동
-            redirectDbConnectActivity();
+            //LoginActivity 이동
+            redirectLoginActivity();
+            InputDataActivity.this.finish();
         }
     }
 
@@ -117,7 +147,7 @@ public class InputDataActivity extends AppCompatActivity {
 
             String hashtag = (String)params[0];
 
-            String serverURL = "http://192.168.0.4/insertUserData.php";
+            String serverURL = "http://172.30.1.52/insertUserData.php";
 
             try{
                 URL url = new URL(serverURL);
@@ -167,8 +197,8 @@ public class InputDataActivity extends AppCompatActivity {
     }
 
     //MainActivity로 이동
-    private void redirectDbConnectActivity() {
-        Intent userProfileIntent = new Intent(this, DbConnectActivity.class);
+    private void redirectLoginActivity() {
+        Intent userProfileIntent = new Intent(this, LoginActivity.class);
         startActivity(userProfileIntent);
         finish();
     }

@@ -60,7 +60,8 @@
         android:layout_height="26dp"
         android:layout_marginBottom="40dp"
         android:background="@drawable/button_round"
-        android:text="로그인" />
+        android:text="로그인"
+        android:onClick="onClick"/>
 
     <ImageButton
         android:id="@+id/btn_google_sign_in"
@@ -70,7 +71,8 @@
         android:src="@drawable/btn_google_signin"
         android:adjustViewBounds="true"
         android:layout_marginBottom="10dp"
-        android:scaleType="center"/>
+        android:scaleType="center"
+        android:onClick="onClick"/>
 
     <ImageButton
         android:id="@+id/btn_kakao_sign_in"
@@ -80,7 +82,8 @@
         android:adjustViewBounds="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/button_round"
-        android:scaleType="center"/>
+        android:scaleType="center"
+        android:onClick="onClick"/>
 
     <!--<com.kakao.usermgmt.LoginButton
         android:id="@+id/btn_com_kakao_login"

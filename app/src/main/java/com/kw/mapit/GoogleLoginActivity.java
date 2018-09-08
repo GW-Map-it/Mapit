@@ -80,8 +80,8 @@ public class GoogleLoginActivity extends Activity implements GoogleApiClient.Con
                 userName = currentPerson.getDisplayName();
             }
 
-            //로그인 액티비티로 이동
-            Intent intent = new Intent(this, GoogleLogin2Activity.class);
+            //InputData 액티비티로 이동
+            Intent intent = new Intent(this, InputDataActivity.class);
             intent.putExtra("NAME", userName);
             startActivity(intent);
         }

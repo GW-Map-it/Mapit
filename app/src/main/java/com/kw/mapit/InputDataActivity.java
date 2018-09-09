@@ -124,11 +124,11 @@ public class InputDataActivity extends AppCompatActivity {
                 Activity activity = (Activity)LoginActivity.activity_login;
                 activity.finish();
 
-                Toast.makeText(getApplicationContext(), "Map it에 오신 것을 환영합니다:)", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Map it에 오신 것을 환영합니다:)", Toast.LENGTH_LONG).show();
             }
             //DB에 사용자 정보 저장 실패 시
             else {
-                Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다:(", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다:(", Toast.LENGTH_LONG).show();
             }
         }
     }

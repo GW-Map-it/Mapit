@@ -1,5 +1,6 @@
 package com.kw.mapit;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -109,22 +110,26 @@ public class InputDataActivity extends AppCompatActivity {
 
             //DB에 사용자 정보 저장 성공 시
             if(result.contains("success")) {
+                loginId.setText("");
+                loginPassword.setText("");
+                rb.setSelected(false);
+                loginAge.setText("");
+                loginEmail.setText("");
+
+                //LoginActivity 이동
+                redirectLoginActivity();
+                InputDataActivity.this.finish();
+
+                //이전 LoginActivity 종료
+                Activity activity = (Activity)LoginActivity.activity_login;
+                activity.finish();
+
                 Toast.makeText(getApplicationContext(), "Map it에 오신 것을 환영합니다:)", Toast.LENGTH_LONG);
             }
             //DB에 사용자 정보 저장 실패 시
             else {
                 Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다:(", Toast.LENGTH_LONG);
             }
-
-            loginId.setText("");
-            loginPassword.setText("");
-            rb.setSelected(false);
-            loginAge.setText("");
-            loginEmail.setText("");
-
-            //LoginActivity 이동
-            redirectLoginActivity();
-            InputDataActivity.this.finish();
         }
     }
 

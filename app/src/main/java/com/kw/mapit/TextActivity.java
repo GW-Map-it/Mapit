@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.nhn.android.maps.NMapActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 public class TextActivity extends AppCompatActivity {
     String myJSON;
@@ -64,14 +68,37 @@ public class TextActivity extends AppCompatActivity {
                         sbParams.append("&").append("latitude=").append(latitude);
 
                         InsertData task = new InsertData();
-                        task.execute(hashtag);
+                        String result = null;
+                        try {
+                            result = task.execute(hashtag).get();
+
+                            //DB에 사용자 정보 저장 성공 시
+                            if(result.contains("success")) {
+                                EditText_HashTag.setText("");
+
+                                Intent intent;
+                                intent = new Intent(TextActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                TextActivity.this.finish();
+
+                                //이전 DbConnectActivity 종료
+                                NMapActivity activity = (NMapActivity)DbConnectActivity.activity_dbConnect;
+                                activity.finish();
+
+                                Toast.makeText(getApplicationContext(), "게시물 등록 성공!", Toast.LENGTH_LONG).show();
+                            }
+                            //DB에 사용자 정보 저장 실패 시
+                            else if(result.contains("Error")) {
+                                Toast.makeText(getApplicationContext(), "게시물 등록 실패..", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
 
                         EditText_HashTag.setText("");
 
-                        Intent intent;
-                        intent = new Intent(TextActivity.this, DbConnectActivity.class);
-                        startActivity(intent);
-                        TextActivity.this.finish();
                     }
                 }
         );

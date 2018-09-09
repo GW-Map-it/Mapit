@@ -43,6 +43,8 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
 
     String myJSON;
 
+    public static Activity activity_login;
+
     //Google Login
     static public GoogleApiClient mGoogleApiClient;
     String userName = null;
@@ -66,6 +68,8 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        activity_login = LoginActivity.this;
 
         edit_id= (EditText)findViewById(R.id.ed_login_id);
         edit_pw= (EditText)findViewById(R.id.ed_login_password);

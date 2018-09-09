@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.lang.Math;
+import java.util.Vector;
 
 public class PixelActivity extends NMapActivity implements NMapView.OnMapStateChangeListener {
     String myJSON;
@@ -77,7 +78,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-        getData("http://172.30.1.27/selectLocation.php");
+        getData("http://192.168.0.193/selectLocation.php");
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -221,9 +222,17 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         NGeoPoint circleCenter = null;
         Point outPoint = null;
 
+        double ssumLong = initLong;
+        double ssumLati = initLati;
+
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
+
+            //Vector
+            Vector<Integer> vecTextNum = new Vector<Integer>();
+            Vector<Double> vecLongi = new Vector<Double>();
+            Vector<Double> vecLati = new Vector<Double>();
 
             for(int k = 0; k < location.length(); k++) {
                 count=1;
@@ -236,7 +245,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                     outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
 
+
                     if (outPoint.x <= 1100 && outPoint.y <= 1800) { //화면 안에 보이는 경우
+
                         circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
                         dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
@@ -244,6 +255,41 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             count++;
                             sumLong = sumLong + Double.parseDouble(longitude);
                             sumLati = sumLati + Double.parseDouble(latitude);
+
+                            //Vector
+                            //점이 원 안에 있고, Vector에 정보가 없으면 저장
+                            if(vecTextNum.size() == 0) {  //Vector에 저장된 데이터가 없을 때
+                                vecTextNum.addElement(Integer.parseInt(textNum));
+                                vecLongi.addElement(Double.parseDouble(longitude));
+                                vecLati.addElement(Double.parseDouble(latitude));
+                            }
+                            //Vector에 저장된 데이터가 있을 때
+                            for(int v=0;v<vecTextNum.size();v++)
+                            {
+                                //Vector에 해당 게시물이 저장되어 있으면 pass
+                                if(vecTextNum.get(v) == Integer.parseInt(textNum))
+                                {
+                                    break;
+                                }
+                                //Vector에 해당 게시물이 없으면 저장
+                                else if(vecTextNum.get(v) == vecTextNum.lastElement()) {
+                                    vecTextNum.addElement(Integer.parseInt(textNum));
+                                    vecLongi.addElement(Double.parseDouble(longitude));
+                                    vecLati.addElement(Double.parseDouble(latitude));
+                                }
+                                ssumLong += vecLongi.get(v);
+                                ssumLati += vecLati.get(v);
+                            }
+                            Log.e("superdroid", "원래 Lati : " + sumLati + ", Longi : " +sumLong + " / 벡터 Lati : " + ssumLati + ", Longi : " + ssumLong);
+                        }
+
+                        //원 밖의 게시물이 Vector에 저장되어 있으면 제거
+                        else {
+                            if(vecTextNum.equals(Integer.parseInt(textNum))) {
+                                vecLongi.remove(vecLongi.indexOf(vecTextNum.indexOf(vecTextNum.equals(Integer.parseInt(textNum)))));
+                                vecLati.remove(vecLati.indexOf(vecTextNum.indexOf(vecTextNum.equals(Integer.parseInt(textNum)))));
+                                vecTextNum.remove(vecTextNum.indexOf(Integer.parseInt(textNum)));
+                            }
                         }
                     }
                 }
@@ -263,6 +309,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         pathDataOverlay.addCircleData(circleData);
 
                         NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                        circleStyle.setLineType(NMapPathLineStyle.TYPE_SOLID);
                         circleStyle.setFillColor(0x000000,0x00);
                         circleData.setCircleStyle(circleStyle);
                     }
@@ -272,6 +319,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 }
             }
             Log.i(LOG_TAG,"마지막 중심좌표! ="+sumLong+" , "+sumLati);
+            //for(int i=0;i<vecTextNum.size();i++) {
+                Log.e("superdroid", "vector : " + vecTextNum );
+            Log.e("superdroid", "vector : " + vecLongi );
+            Log.e("superdroid", "vector : " + vecLati );
+            //}
         } catch (JSONException e){
             e.printStackTrace();
         }

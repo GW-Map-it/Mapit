@@ -74,6 +74,7 @@
         android:scaleType="center"
         android:onClick="onClick"/>
 
+    <!--
     <ImageButton
         android:id="@+id/btn_kakao_sign_in"
         android:layout_width="270dp"
@@ -84,11 +85,14 @@
         android:background="@drawable/button_round"
         android:scaleType="center"
         android:onClick="onClick"/>
+        -->
 
-    <!--<com.kakao.usermgmt.LoginButton
-        android:id="@+id/btn_com_kakao_login"
+    <com.kakao.usermgmt.LoginButton
+        android:id="@+id/btn_kakao_sign_in"
         android:layout_width="270dp"
-        android:layout_height="50dp"/>-->
+        android:layout_height="40dp"
+        android:layout_marginBottom="10dp"
+        android:onClick="onClick" />
 
     <Button
         android:id="@+id/btn_sign_in"

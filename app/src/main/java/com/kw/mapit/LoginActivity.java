@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -21,6 +24,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+import com.kakao.auth.ISessionCallback;
+import com.kakao.auth.Session;
+import com.kakao.util.exception.KakaoException;
 import com.nhn.android.maps.overlay.NMapPathData;
 import com.nhn.android.maps.overlay.NMapPathLineStyle;
 import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
@@ -37,7 +43,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
+
+import static com.kakao.util.helper.Utility.getPackageInfo;
 
 public class LoginActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
 
@@ -48,6 +58,9 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
     //Google Login
     static public GoogleApiClient mGoogleApiClient;
     String userName = null;
+
+    //Kakao Login
+    private SessionCallback callback;
 
     private static final String TAG_RESULTS = "result";
     private static final String TAG_USER_ID = "id";
@@ -77,6 +90,27 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
         //EditText 글자 색 : 검정
         edit_id.setTextColor(Color.BLACK);
         edit_pw.setTextColor(Color.BLACK);
+
+        callback = new SessionCallback();
+        Session.getCurrentSession().addCallback(callback);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(Session.getCurrentSession() != null) {
+            if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+                return;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(Session.getCurrentSession() != null) {
+            Session.getCurrentSession().removeCallback(callback);
+        }
     }
 
     //버튼 클릭 시
@@ -105,8 +139,10 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
 
         //Kakao Api 회원가입
         else if(v.getId() == R.id.btn_kakao_sign_in) {
-            Intent goIntent = new Intent(this, KakaoLoginActivity.class);
-            startActivity(goIntent);
+            //Intent goIntent = new Intent(this, KakaoLoginActivity.class);
+            //startActivity(goIntent);
+
+
         }
 
         //자체 회원가입
@@ -116,23 +152,31 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
         }
     }
 
-    //DB에서 입력한 id에 맞는 password 가져오기
-    protected void matchData(){
-        try {
-            JSONObject jsonObj = new JSONObject(myJSON);
-            userData = jsonObj.getJSONArray(TAG_RESULTS);
+    private class SessionCallback implements ISessionCallback {
 
-            for(int i=0; i<userData.length(); i++) {
-                JSONObject c = userData.getJSONObject(i);
-                user_id = c.optString(TAG_USER_ID);
-                user_password = c.optString(TAG_USER_PASSWORD);
-
-                Log.i(LOG_TAG, "user_id = "+user_id);
-                Log.i(LOG_TAG, "user_password = "+user_password);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        //세션 연결 성공 시 KakaoSignupAcitivity로 이동
+        @Override
+        public void onSessionOpened() {
+            redirectSignupActivity();
         }
+
+        //세션 연결 실패 시(다시 LoginActivity로 이동
+        @Override
+        public void onSessionOpenFailed(KakaoException exception) {
+            if(exception != null) {
+                Log.e("Session Open Failed = ",String.valueOf(exception));
+            }
+            setContentView(R.layout.activity_login);
+        }
+
+    }
+
+    //SIgnupActivity로 이동
+    protected void redirectSignupActivity() {
+        final Intent intent = new Intent(this, KakaoSignupActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+        finish();
     }
 
     class getUserData extends AsyncTask<String, Void, String> {

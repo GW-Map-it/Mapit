@@ -37,6 +37,8 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
     private String latitude = null;
     private String longitude = null;
 
+    public static NMapActivity activity_dbConnect;
+
     // API-KEY
     public static final String API_KEY = "29AIQje_U7muB8tVyofe";  //<---맨위에서 발급받은 본인 ClientID 넣으세요.
     // 네이버 맵 객체
@@ -59,6 +61,8 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_db_connect);
+
+        activity_dbConnect = DbConnectActivity.this;
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -195,13 +199,12 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
             }
 
             // [[TEMP]] handle a click event of the callout
-            //Toast.makeText(MainActivity.this, "onCalloutClick: " + item.getTitle(), Toast.LENGTH_LONG).show();
+
             Intent intent;
             intent = new Intent(DbConnectActivity.this, TextActivity.class);
             intent.putExtra("latitude", latitude);
             intent.putExtra("longitude", longitude);
             startActivity(intent);
-
         }
 
         public void onFocusChanged(NMapPOIdataOverlay poiDataOverlay, NMapPOIitem item) {
@@ -302,8 +305,8 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
         @Override
         public void onPointChanged(NMapPOIdataOverlay poiDataOverlay, NMapPOIitem item) {
             NGeoPoint point = item.getPoint();
-            latitude = point.toString().split(",")[0];
-            longitude = point.toString().split(",")[1];
+            longitude = point.toString().split(",")[0];
+            latitude = point.toString().split(",")[1];
 
             //if (DEBUG) {
             Log.i(LOG_TAG, "onPointChanged: point=" + point.toString());

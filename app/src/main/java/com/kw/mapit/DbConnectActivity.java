@@ -302,8 +302,9 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
         @Override
         public void onPointChanged(NMapPOIdataOverlay poiDataOverlay, NMapPOIitem item) {
             NGeoPoint point = item.getPoint();
-            latitude = point.toString().split(",")[0];
-            longitude = point.toString().split(",")[1];
+            Log.i(LOG_TAG,"long= "+point.longitude+"lati= "+point.latitude);
+            longitude = point.toString().split(",")[0];
+            latitude = point.toString().split(",")[1];
 
             //if (DEBUG) {
             Log.i(LOG_TAG, "onPointChanged: point=" + point.toString());

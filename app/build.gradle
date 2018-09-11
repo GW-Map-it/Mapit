@@ -39,10 +39,10 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     //Google Login
-    implementation 'com.google.firebase:firebase-core:11.8.0'
-    implementation 'com.google.firebase:firebase-auth:11.8.0'
-    implementation 'com.google.android.gms:play-services-auth:11.8.0'
-    implementation 'com.google.android.gms:play-services-plus:11.8.0'
+
+    //Kakao Login
+    implementation group: project.KAKAO_SDK_GROUP, name: 'usermgmt', version: project.KAKAO_SDK_VERSION
+    implementation 'com.android.volley:volley:1.0.0'
 
     //NaverMap Api
     /*implementation 'com.android.support:appcompat-v7:25.3.1'

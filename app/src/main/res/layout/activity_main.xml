@@ -16,20 +16,6 @@
         android:onClick="myClick"/>
 
     <Button
-        android:id="@+id/google_login"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:text="Google Login"
-        android:onClick="myClick"/>
-
-    <Button
-        android:id="@+id/kakao_login"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:text="Kakao Login"
-        android:onClick="myClick"/>
-
-    <Button
         android:id="@+id/db_connect"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
@@ -41,6 +27,13 @@
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:text="Pixel"
+        android:onClick="myClick"/>
+
+    <Button
+        android:id="@+id/get_hashtag"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Get Popular HashTag"
         android:onClick="myClick"/>
 
     <Button

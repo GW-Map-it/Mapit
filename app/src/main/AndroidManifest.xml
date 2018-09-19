@@ -30,12 +30,14 @@
         <activity android:name=".DbConnectActivity" />
         <activity android:name=".TextActivity" />
         <activity android:name=".PixelActivity" />
-        <activity android:name=".InputDataActivity"></activity>
+        <activity android:name=".InputDataActivity" />
 
         <!-- Kakao Login -->
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
+
+        <activity android:name=".PopularHashTagActivity"></activity>
     </application>
 
 </manifest>

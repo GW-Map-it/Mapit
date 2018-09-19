@@ -30,7 +30,8 @@
         <activity android:name=".DbConnectActivity" />
         <activity android:name=".TextActivity" />
         <activity android:name=".PixelActivity" />
-        <activity android:name=".InputDataActivity"></activity>
+        <activity android:name=".InputDataActivity" />
+        <activity android:name=".PopularHashTagActivity" />
 
         <!-- Kakao Login -->
         <meta-data

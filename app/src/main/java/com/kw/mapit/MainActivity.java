@@ -22,15 +22,6 @@ public class MainActivity extends Activity {
         if(v.getId() == R.id.main_login) {
             goIntent = new Intent(this, LoginActivity.class);
         }
-        //Google Login
-        else if(v.getId() == R.id.google_login) {
-            goIntent = new Intent(this, GoogleLoginActivity.class);
-        }
-        //Kakao Login
-        else if(v.getId() == R.id.kakao_login) {
-            Toast.makeText(MainActivity.this, "Kakao Login 연결 필요", Toast.LENGTH_LONG).show();
-            //goIntent = new Intent(this, KakaoLoginActivity.class);
-        }
         //DB_Connect & Write text
         else if(v.getId() == R.id.db_connect) {
             goIntent = new Intent(this, DbConnectActivity.class);
@@ -38,6 +29,9 @@ public class MainActivity extends Activity {
         //Divide by pixel
         else if(v.getId() == R.id.pixel) {
             goIntent = new Intent(this, PixelActivity.class);
+        }
+        else if(v.getId() == R.id.get_hashtag) {
+            goIntent = new Intent(this, PopularHashTagActivity.class);
         }
         else if(v.getId() == R.id.main_map) {
             Toast.makeText(MainActivity.this, "아직..", Toast.LENGTH_LONG).show();

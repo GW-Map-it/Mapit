@@ -63,7 +63,7 @@ public class TextActivity extends AppCompatActivity {
                     public void onClick(View v){
                         String hashtag = EditText_HashTag.getText().toString();
                         sbParams = new StringBuffer();
-                        sbParams.append("hashtag=").append(hashtag);
+                        sbParams.append("hashtag=").append(" " + hashtag);
                         sbParams.append("&").append("longitude=").append(longitude);
                         sbParams.append("&").append("latitude=").append(latitude);
 

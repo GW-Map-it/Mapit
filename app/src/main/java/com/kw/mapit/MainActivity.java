@@ -30,12 +30,12 @@ public class MainActivity extends Activity {
         else if(v.getId() == R.id.pixel) {
             goIntent = new Intent(this, PixelActivity.class);
         }
+        else if(v.getId() == R.id.get_hashtag) {
+            goIntent = new Intent(this, PopularHashTagActivity.class);
+        }
         else if(v.getId() == R.id.main_map) {
             Toast.makeText(MainActivity.this, "아직..", Toast.LENGTH_LONG).show();
             //goIntent = new Intent(this, MainMapActivity.class);
-        }
-        else if(v.getId() == R.id.get_hashtag) {
-            goIntent = new Intent(this, PopularHashTagActivity.class);
         }
 
         if(goIntent != null) {

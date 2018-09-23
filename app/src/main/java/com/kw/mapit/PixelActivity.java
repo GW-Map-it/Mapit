@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -51,6 +50,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     String longitude;
     String latitude;
 
+    boolean isInit=false;
+
     JSONArray location = null;
 
     // API-KEY
@@ -76,7 +77,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-        getData("http://192.168.0.14/selectLocation.php");
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
+        getData(serverURL);
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -174,7 +176,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             e.printStackTrace();
         }
     }
-    protected void matchData(double initLong, double initLati, float radius){ //데이터를 점에 매칭
+    protected void matchData(){ //데이터를 점에 매칭
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
@@ -186,7 +188,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 latitude = c.optString(TAG_LATITUDE);
 
                 // set path data points
-                NMapPathData pathData = new NMapPathData(9);
+                NMapPathData pathData = new NMapPathData(1);
 
                 //데이터 위치 점 찍어주는 부분
                 pathData.initPathData();
@@ -208,19 +210,23 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             e.printStackTrace();
         }
     }
-    protected void meanShift(double initLong, double initLati, float radius) {
-        //원의 중심, 원의 반지름, 점의 위치(알고 있음)
-        //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
-        //작으면 안에 포함되어 있는 점이라고 생각
 
+    /**
+     * 원과 점 사이의 거리로 원 안의 포함여부 계산한다
+     * meanshift로 원 위치 계속 옮기고 마지막 한 번만 그리는 알고리즘
+     */
+    protected void meanShift(double initLong, double initLati, float radius) {
         double dataDis;
-        double sumLong = initLong;
-        double sumLati = initLati;
-        int count=1;
-        NGeoPoint circleCenter = null;
+        double sumLong = initLong;         //원 안에 속한 점이면 계속 더해줄 위도
+        double sumLati = initLati;         //원 안에 속한 점이면 계속 더해줄 경도
+        int count;                         //원 한 번 계산해줄때마다 sumLong과 sumLati 나눠줄 count
+        NGeoPoint circleCenter;
         Point outPoint = null;
 
         try {
+            /* 제이슨 받아오는 부분 matchData 함수랑 겹치는 곳 나중에 빼줄 것
+               일단 혹시 몰라서 놔둠 */
+
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
 
@@ -235,9 +241,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                     outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
 
-
-                    if (outPoint.x <= 1100 && outPoint.y <= 1800) { //화면 안에 보이는 경우
-
+                    if (outPoint.x <= 1100 && outPoint.x >= 0 && outPoint.y >= 0 && outPoint.y <= 1800) { //화면 안에 보이는 경우
                         circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
                         dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
@@ -248,31 +252,31 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         }
                     }
                 }
-                /*불필요*/
-                NMapPathData pathData = new NMapPathData(1);
-                pathData.initPathData();
-                pathData.addPathPoint(127, 37, 0);
-                pathData.endPathData();
 
-                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
-                if (pathDataOverlay != null) {
-                    NMapCircleData circleData = new NMapCircleData(1);
+                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
+
+                NMapCircleData circleData = new NMapCircleData(1);
+
+                if(sumLong != initLong || sumLati != initLati) {
                     if( k == location.length() - 1) {
                         circleData.initCircleData();
                         circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
+                        //circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
                         circleData.endCircleData();
                         pathDataOverlay.addCircleData(circleData);
 
                         NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                        circleStyle.setFillColor(0x000000,0x00);
+                        circleStyle.setFillColor(0x000000, 0x00);
                         circleData.setCircleStyle(circleStyle);
                     }
-                    pathDataOverlay.showAllPathData(0);
-                    sumLong=sumLong/count;
-                    sumLati=sumLati/count;
+                    pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
+                    sumLong = sumLong / count;
+                    sumLati = sumLati / count;
                 }
             }
-            Log.i(LOG_TAG,"마지막 중심좌표! ="+sumLong+" , "+sumLati);
+
+            Log.i(LOG_TAG,"마지막 중심좌표! = " + sumLong + " , " + sumLati);
+
         } catch (JSONException e){
             e.printStackTrace();
         }
@@ -285,9 +289,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapInitHandler(NMapView mapview, NMapError errorInfo) {
+
         if (errorInfo == null) { // success
             mMapController.setMapCenter(
                     new NGeoPoint(127.061, 37.51), 11);
+
+        isInit=true;
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
                     + errorInfo.toString());
@@ -299,10 +306,15 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
-        //int zoomLevel;
-        //zoomLevel=mMapController.getZoomLevel();
-        //Log.i(LOG_TAG,"zoomLevel = "+zoomLevel);
-        //meanShift(127.0541, 37.5228, 500f);
+        if(isInit){
+            //mapview.getOverlays().clear();
+            meanShift(mapview.getMapController().getMapCenter().longitude,
+                    mapview.getMapController().getMapCenter().latitude, 900f);
+
+            Log.i(LOG_TAG, "zoomLevel = "+level);
+            Log.i(LOG_TAG, "Z: center-longitude : " + mapview.getMapController().getMapCenter().longitude);
+            Log.i(LOG_TAG, "Z: center-latitude : " + mapview.getMapController().getMapCenter().latitude);
+        }
     }
 
     /**
@@ -310,9 +322,13 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
-        Log.i(LOG_TAG, "center-longitude : "+String.valueOf(center.longitude));
-        Log.i(LOG_TAG, "center-latitude : "+String.valueOf(center.latitude));
-        //meanShift(center.longitude, center.latitude, 900f);
+        if(isInit){
+            //mapview.getOverlays().clear();
+            meanShift(center.longitude, center.latitude, 900f);
+
+            Log.i(LOG_TAG, "C: center-longitude : " + String.valueOf(center.longitude));
+            Log.i(LOG_TAG, "C: center-latitude : " + String.valueOf(center.latitude));
+        }
     }
 
     /**
@@ -482,11 +498,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 }
             }
             protected  void onPostExecute(String result) {
-                Log.i(LOG_TAG, result);
                 myJSON = result;
-                //showLog();
+
                 long startTime = System.currentTimeMillis();
-                matchData(127.0569, 37.5293, 900f); //처음에 원 그리는 위치
+                matchData();
                 meanShift(127.0569, 37.5293, 900f);
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
@@ -499,6 +514,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
         getDataJSON g = new getDataJSON();
         g.execute(url);
+
     }
 
 }

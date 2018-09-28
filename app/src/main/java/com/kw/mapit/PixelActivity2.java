@@ -38,8 +38,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.lang.Math;
 
-public class PixelActivity extends NMapActivity implements NMapView.OnMapStateChangeListener {
+public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateChangeListener {
     String myJSON;
 
     private static final String TAG_RESULTS = "result";
@@ -50,6 +51,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     String textNum;
     String longitude;
     String latitude;
+
+    //이전의 원의 중심 127.0541, 37.5228
+    private double exLong=127.0541;
+    private double exLati=37.5228;
 
     JSONArray location = null;
 
@@ -76,7 +81,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-        getData("http://172.30.58.165/selectLocation.php");
+        getData("http://172.30.1.26/selectLocation.php");
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -92,7 +97,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         // 생성된 네이버 지도 객체를 LinearLayout에 추가시킨다.
         MapContainer.addView(mMapView);
 
-        // 지도를 터치할 수 있도록 옵션 활성화f
+        // 지도를 터치할 수 있도록 옵션 활성화
         mMapView.setClickable(true);
         mMapView.setEnabled(true);
         mMapView.setFocusable(true);
@@ -174,8 +179,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             e.printStackTrace();
         }
     }
-    protected void matchData(double initLong, double initLati, float radius){ //데이터를 점에 매칭
+    protected void drawPolygon(double initLong, double initLati, float radius){ //점, 원 그려준다
         try {
+
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
 
@@ -188,21 +194,32 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 // set path data points
                 NMapPathData pathData = new NMapPathData(9);
 
-                //데이터 위치 점 찍어주는 부분
                 pathData.initPathData();
-                pathData.addPathPoint(Float.parseFloat(longitude), Float.parseFloat(latitude), NMapPathLineStyle.TYPE_SOLID);
-                pathData.addPathPoint(Float.parseFloat(longitude)+0.00001, Float.parseFloat(latitude)+0.00001, 0);
+                pathData.addPathPoint(Double.parseDouble(longitude), Double.parseDouble(latitude), NMapPathLineStyle.TYPE_SOLID);
+                pathData.addPathPoint(Double.parseDouble(longitude)+0.00001, Double.parseDouble(latitude)+0.00001, 0);
                 pathData.endPathData();
-
-                NMapPathLineStyle pathLineStyle = new NMapPathLineStyle(mMapView.getContext());
-                pathLineStyle.setLineColor(0xA04DD2, 0xff);
-                pathLineStyle.setFillColor(0xFFFFFF,0x00);
-                pathData.setPathLineStyle(pathLineStyle);
 
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
 
-                // show all path data
-                pathDataOverlay.showAllPathData(0);
+                if (pathDataOverlay != null) {
+                    // add circle data
+                    NMapCircleData circleData = new NMapCircleData(1);
+                    circleData.initCircleData();
+                    //circleData.addCirclePoint(initLong, initLati, radius);
+
+                    //circleData.addCirclePoint(127.0541, 37.5228,500f); //초기위치
+                    circleData.endCircleData();
+
+                    pathDataOverlay.addCircleData(circleData);
+                    // set circle style
+                    NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                    circleStyle.setLineType(NMapPathLineStyle.TYPE_SOLID);
+                    circleStyle.setFillColor(0x000002, 0x22);
+                    circleData.setCircleStyle(circleStyle);
+
+                    // show all path data
+                    pathDataOverlay.showAllPathData(0);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -213,69 +230,93 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
         //작으면 안에 포함되어 있는 점이라고 생각
 
-        double dataDis;
-        double sumLong = initLong;
-        double sumLati = initLati;
-        int count=1;
-        NGeoPoint circleCenter = null;
-        Point outPoint = null;
+
+        //종결 조건
+        if((initLong - exLong < 0.00000001 || exLong - initLong < 0.00000001) && (initLati - exLati < 0.00000001 || exLati - initLati < 0.00000001))
+        {
+            NMapPathData pathData = new NMapPathData(1);
+            pathData.initPathData();
+            pathData.addPathPoint(127, 37, 0);
+            pathData.endPathData();
+
+            NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+
+            NMapCircleData circleData = new NMapCircleData(1);
+
+            circleData.initCircleData();
+            circleData.addCirclePoint(initLong, initLati, radius); //중심, 반지름 //원생성!!!
+            circleData.endCircleData();
+            pathDataOverlay.addCircleData(circleData);
+
+            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+            circleStyle.setFillColor(0x000000,0x00);
+            circleData.setCircleStyle(circleStyle);
+            return;
+        }
 
         try {
+            double dataDis;
+            int count=0;
+            double sumLong = 0;
+            double sumLati = 0;
+            NGeoPoint circleCenter = new NGeoPoint((initLong),(initLati));
+            Point outPoint = null;
+
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
 
-            for(int k = 0; k < location.length(); k++) {
-                count=1;
-                for (int i = 0; i < location.length(); i++) {
-                    JSONObject c = location.getJSONObject(i);
-                    textNum = c.optString(TAG_TEXT_NUM);
-                    longitude = c.optString(TAG_LONGITUDE);
-                    latitude = c.optString(TAG_LATITUDE);
+            for (int i = 0; i < location.length(); i++) {   //모든 데이터
+                JSONObject c = location.getJSONObject(i);
+                textNum = c.optString(TAG_TEXT_NUM);
+                longitude = c.optString(TAG_LONGITUDE);
+                latitude = c.optString(TAG_LATITUDE);
 
-                    NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                    outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
+                NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
+                Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
+                if(outPoint.x <= 1100 && outPoint.y <= 1800) {          //화면 안에 보이는 경우
+                    dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+                    Log.i(LOG_TAG,"dataDis = "+dataDis);
 
-                    if (outPoint.x <= 1100 && outPoint.y <= 1800) { //화면 안에 보이는 경우
+                    if(dataDis < radius) { //원 안에 있으면
+                        count++;
+                        sumLong += Double.parseDouble(longitude);
+                        sumLati += Double.parseDouble(latitude);
 
-                        circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
-                        dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+                        /*불필요*/
+                        NMapPathData pathData = new NMapPathData(1);
+                        pathData.initPathData();
+                        pathData.addPathPoint(127,37,0);
+                        pathData.endPathData();
 
-                        if (dataDis < radius) { //원 안에 있으면
-                            count++;
-                            sumLong = sumLong + Double.parseDouble(longitude);
-                            sumLati = sumLati + Double.parseDouble(latitude);
+                        NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+                        if(pathDataOverlay!=null) {
+                            NMapCircleData circleData = new NMapCircleData(1);
+
+                            circleData.initCircleData();
+                            circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
+                            circleData.endCircleData();
+                            pathDataOverlay.addCircleData(circleData);
+
+                            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                            circleStyle.setFillColor(0x000000,0x00);
+                            circleData.setCircleStyle(circleStyle);
                         }
                     }
                 }
-                /*불필요*/
-                NMapPathData pathData = new NMapPathData(1);
-                pathData.initPathData();
-                pathData.addPathPoint(127, 37, 0);
-                pathData.endPathData();
 
-                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
-                if (pathDataOverlay != null) {
-                    NMapCircleData circleData = new NMapCircleData(1);
-                    if( k == location.length() - 1) {
-                        circleData.initCircleData();
-                        circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
-                        circleData.endCircleData();
-                        pathDataOverlay.addCircleData(circleData);
-
-                        NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                        circleStyle.setFillColor(0x000000,0x00);
-                        circleData.setCircleStyle(circleStyle);
-                    }
-                    pathDataOverlay.showAllPathData(0);
-                    sumLong=sumLong/count;
-                    sumLati=sumLati/count;
-                }
+                exLong = initLong;
+                exLati = initLati;
+                meanShift(sumLong/count, sumLati/count, radius);
             }
-            Log.i(LOG_TAG,"마지막 중심좌표! ="+sumLong+" , "+sumLati);
         } catch (JSONException e){
             e.printStackTrace();
         }
+
+    }
+    protected static double getDistance(double x1, double x2, double y1, double y2) {
+        return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
 
     /**
@@ -310,9 +351,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
-        Log.i(LOG_TAG, "center-longitude : "+String.valueOf(center.longitude));
-        Log.i(LOG_TAG, "center-latitude : "+String.valueOf(center.latitude));
-        //meanShift(center.longitude, center.latitude, 900f);
     }
 
     /**
@@ -345,7 +383,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             // [[TEMP]] handle a click event of the callout
             //Toast.makeText(MainActivity.this, "onCalloutClick: " + item.getTitle(), Toast.LENGTH_LONG).show();
             Intent intent;
-            intent = new Intent(PixelActivity.this, TextActivity.class);
+            intent = new Intent(PixelActivity2.this, TextActivity.class);
             startActivity(intent);
         }
 
@@ -390,7 +428,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                     if (countOfOverlappedItems > 1) {
                         String text = countOfOverlappedItems + " overlapped items for " + overlayItem.getTitle();
-                        Toast.makeText(PixelActivity.this, text, Toast.LENGTH_LONG).show();
+                        Toast.makeText(PixelActivity2.this, text, Toast.LENGTH_LONG).show();
                         return null;
                     }
                 }
@@ -426,7 +464,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             if (errInfo != null) {
                 Log.e(LOG_TAG, "Failed to findPlacemarkAtLocation: error=" + errInfo.toString());
 
-                Toast.makeText(PixelActivity.this, errInfo.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(PixelActivity2.this, errInfo.toString(), Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -484,17 +522,24 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             protected  void onPostExecute(String result) {
                 Log.i(LOG_TAG, result);
                 myJSON = result;
+                Point searchStartPixel = new Point(0,0);
+                NGeoPoint searchStart = null;
                 //showLog();
+
                 long startTime = System.currentTimeMillis();
-                matchData(127.0569, 37.5293, 1500f); //처음에 원 그리는 위치
-                meanShift(127.0569, 37.5293, 1500f);
+
+                for(int i=0; i<=1100; i+=550) {
+                    for(int j=0; j<=1800; j+=900) {
+                        searchStartPixel.set(i,j);
+                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                        drawPolygon(searchStart.longitude, searchStart.latitude, 1000f);
+                        meanShift(searchStart.longitude, searchStart.latitude, 1000f);
+                    }
+                }
+
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
-
-                //meanShift(127.0483,37.4713,1500f);
-                //meanShift(127.0186,37.5094,1500f);
-                //meanShift(127.0433, 37.5808,1500f);
             }
         }
         getDataJSON g = new getDataJSON();

@@ -30,6 +30,9 @@ public class MainActivity extends Activity {
         else if(v.getId() == R.id.pixel) {
             goIntent = new Intent(this, PixelActivity.class);
         }
+        else if(v.getId() == R.id.pixel2) {
+            goIntent = new Intent(this, PixelActivity2.class);
+        }
         else if(v.getId() == R.id.get_hashtag) {
             goIntent = new Intent(this, PopularHashTagActivity.class);
         }

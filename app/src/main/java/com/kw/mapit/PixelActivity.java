@@ -78,7 +78,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         setContentView(R.layout.activity_pixel);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         getData("http://172.30.58.165/selectLocation.php");
+=======
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
+        getData(serverURL);
+>>>>>>> b42552dcb009c30e9b53374b73b46b160b04395c
 =======
         String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
         getData(serverURL);
@@ -506,9 +511,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 long startTime = System.currentTimeMillis();
 <<<<<<< HEAD
+<<<<<<< HEAD
                 matchData(127.0569, 37.5293, 1500f); //처음에 원 그리는 위치
                 meanShift(127.0569, 37.5293, 1500f);
 =======
+=======
+>>>>>>> b42552dcb009c30e9b53374b73b46b160b04395c
                 matchData();
                 meanShift(127.0569, 37.5293, 900f);
 >>>>>>> b42552dcb009c30e9b53374b73b46b160b04395c

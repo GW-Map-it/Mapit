@@ -65,7 +65,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
     String latitude;
     String hashtag;
 
-    HashMap<String, Integer> count_hashtag = new HashMap<>();
+    HashMap<String, Integer> count_hashtag;
 
     JSONArray location = null;
 
@@ -206,12 +206,13 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
             e.printStackTrace();
         }
     }
-    protected void meanShift() {
+    protected void meanShift(double initLong, double initLati, float radius) {
         //원의 중심, 원의 반지름, 점의 위치(알고 있음)
         //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
         //작으면 안에 포함되어 있는 점이라고 생각
 
         Point outPoint = null;
+        count_hashtag = new HashMap<>();
 
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
@@ -226,7 +227,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
 
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
-                Log.e("superdoird", outPoint.toString());
+                //Log.e("superdroid", outPoint.toString());
 
                 if (outPoint.x <= 1100 && outPoint.y <= 1800) { //화면 안에 보이는 경우
                     String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
@@ -235,7 +236,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
                     for(int j=0;j<split_hashtag.length;j++) {
                         Iterator<String> iterator = count_hashtag.keySet().iterator();
                         if(count_hashtag.size() == 0) {
-                            count_hashtag.put(split_hashtag[i], 1);
+                            count_hashtag.put(split_hashtag[j], 1);
                         }
                         else {
                             while (iterator.hasNext()) {
@@ -247,7 +248,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
                                     break;
                                 }
                                 //hashtag와 일치하는 key가 없으면 HashMap에 추가
-                                else if (count_hashtag.containsKey(split_hashtag[j]) == false && iterator.hasNext() == false/* && j == split_hashtag.length - 1*/) {
+                                else if (count_hashtag.containsKey(split_hashtag[j]) == false && iterator.hasNext() == false) {
                                     count_hashtag.put(split_hashtag[j], 1);
                                     break;
                                 }
@@ -260,14 +261,21 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
 
             count_hashtag = sortByValue(count_hashtag);
 
-            //HashMap Log에 출력 & HashMap에서 key가 null값인 데이터 삭제
-            Iterator<String> iterator2 = count_hashtag.keySet().iterator();
-            while (iterator2.hasNext()) {
-                String key = iterator2.next();
-                int value = count_hashtag.get(key);
+            //HashMap에서 key가 null값인 데이터 삭제
+            Iterator<String> remove_iterator = count_hashtag.keySet().iterator();
+            while (remove_iterator.hasNext()) {
+                String key = remove_iterator.next();
+
                 if (key.equals("")) {
-                    iterator2.remove();
+                    remove_iterator.remove();
                 }
+            }
+
+            //HashMap Log에 출력
+            Iterator<String> it = count_hashtag.keySet().iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                int value = count_hashtag.get(key);
 
                 Log.e("superdorid", key + " : " + value);
             }
@@ -327,6 +335,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
         //zoomLevel=mMapController.getZoomLevel();
         //Log.i(LOG_TAG,"zoomLevel = "+zoomLevel);
         //meanShift(127.0541, 37.5228, 500f);
+        meanShift(127.0569, 37.5293, 900f);
     }
 
     /**
@@ -510,7 +519,8 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
                 myJSON = result;
                 //showLog();
                 long startTime = System.currentTimeMillis();
-                meanShift();
+                matchData(127.0569, 37.5293, 900f);;
+                meanShift(127.0569, 37.5293, 900f);
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");

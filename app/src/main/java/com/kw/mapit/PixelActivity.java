@@ -77,12 +77,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-<<<<<<< HEAD
-        getData("http://172.30.58.165/selectLocation.php");
-=======
         String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
         getData(serverURL);
->>>>>>> b42552dcb009c30e9b53374b73b46b160b04395c
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -505,13 +501,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 myJSON = result;
 
                 long startTime = System.currentTimeMillis();
-<<<<<<< HEAD
-                matchData(127.0569, 37.5293, 1500f); //처음에 원 그리는 위치
-                meanShift(127.0569, 37.5293, 1500f);
-=======
+
                 matchData();
                 meanShift(127.0569, 37.5293, 900f);
->>>>>>> b42552dcb009c30e9b53374b73b46b160b04395c
+
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");

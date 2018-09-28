@@ -81,7 +81,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-        getData("http://172.30.1.26/selectLocation.php");
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
+        getData(serverURL);
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);

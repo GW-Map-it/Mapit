@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhn.android.maps.NMapActivity;
@@ -40,32 +39,22 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.lang.Math;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
-public class PopularHashTagActivity extends NMapActivity implements NMapView.OnMapStateChangeListener {
+public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateChangeListener {
     String myJSON;
 
     private static final String TAG_RESULTS = "result";
     private static final String TAG_TEXT_NUM = "text_num";
     private static final String TAG_LONGITUDE = "longitude";
     private static final String TAG_LATITUDE = "latitude";
-    private static final String TAG_HASHTAG = "hashtag";
 
     String textNum;
     String longitude;
     String latitude;
-    String hashtag;
 
-    HashMap<String, Integer> count_hashtag;
+    //이전의 원의 중심 127.0541, 37.5228
+    private double exLong=127.0541;
+    private double exLati=37.5228;
 
     JSONArray location = null;
 
@@ -90,9 +79,10 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_popular_hash_tag);
+        setContentView(R.layout.activity_pixel);
 
-        getData("http://"+ getString(R.string.ip) +"/selectLocation.php");
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
+        getData(serverURL);
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -108,7 +98,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
         // 생성된 네이버 지도 객체를 LinearLayout에 추가시킨다.
         MapContainer.addView(mMapView);
 
-        // 지도를 터치할 수 있도록 옵션 활성화f
+        // 지도를 터치할 수 있도록 옵션 활성화
         mMapView.setClickable(true);
         mMapView.setEnabled(true);
         mMapView.setFocusable(true);
@@ -171,7 +161,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
         mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
 
     }
-    protected void matchData(double initLong, double initLati, float radius){ //데이터를 점에 매칭
+    protected   void showLog() {
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
@@ -181,26 +171,56 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
                 textNum = c.optString(TAG_TEXT_NUM);
                 longitude = c.optString(TAG_LONGITUDE);
                 latitude = c.optString(TAG_LATITUDE);
-                hashtag = c.optString(TAG_HASHTAG);
+
+                Log.i(LOG_TAG, "text_num = "+textNum);
+                Log.i(LOG_TAG, "longitude = "+longitude);
+                Log.i(LOG_TAG, "latitude = "+latitude);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    protected void drawPolygon(double initLong, double initLati, float radius){ //점, 원 그려준다
+        try {
+
+            JSONObject jsonObj = new JSONObject(myJSON);
+            location = jsonObj.getJSONArray(TAG_RESULTS);
+
+            for(int i=0; i<location.length(); i++) {
+                JSONObject c = location.getJSONObject(i);
+                textNum = c.optString(TAG_TEXT_NUM);
+                longitude = c.optString(TAG_LONGITUDE);
+                latitude = c.optString(TAG_LATITUDE);
 
                 // set path data points
                 NMapPathData pathData = new NMapPathData(9);
 
-                //데이터 위치 점 찍어주는 부분
                 pathData.initPathData();
-                pathData.addPathPoint(Float.parseFloat(longitude), Float.parseFloat(latitude), NMapPathLineStyle.TYPE_SOLID);
-                pathData.addPathPoint(Float.parseFloat(longitude)+0.00001, Float.parseFloat(latitude)+0.00001, 0);
+                pathData.addPathPoint(Double.parseDouble(longitude), Double.parseDouble(latitude), NMapPathLineStyle.TYPE_SOLID);
+                pathData.addPathPoint(Double.parseDouble(longitude)+0.00001, Double.parseDouble(latitude)+0.00001, 0);
                 pathData.endPathData();
-
-                NMapPathLineStyle pathLineStyle = new NMapPathLineStyle(mMapView.getContext());
-                pathLineStyle.setLineColor(0xA04DD2, 0xff);
-                pathLineStyle.setFillColor(0xFFFFFF,0x00);
-                pathData.setPathLineStyle(pathLineStyle);
 
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
 
-                // show all path data
-                pathDataOverlay.showAllPathData(0);
+                if (pathDataOverlay != null) {
+                    // add circle data
+                    NMapCircleData circleData = new NMapCircleData(1);
+                    circleData.initCircleData();
+                    //circleData.addCirclePoint(initLong, initLati, radius);
+
+                    //circleData.addCirclePoint(127.0541, 37.5228,500f); //초기위치
+                    circleData.endCircleData();
+
+                    pathDataOverlay.addCircleData(circleData);
+                    // set circle style
+                    NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                    circleStyle.setLineType(NMapPathLineStyle.TYPE_SOLID);
+                    circleStyle.setFillColor(0x000002, 0x22);
+                    circleData.setCircleStyle(circleStyle);
+
+                    // show all path data
+                    pathDataOverlay.showAllPathData(0);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -211,104 +231,94 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
         //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
         //작으면 안에 포함되어 있는 점이라고 생각
 
-        Point outPoint = null;
-        count_hashtag = new HashMap<>();
+
+        //종결 조건
+        if((initLong - exLong < 0.00000001 || exLong - initLong < 0.00000001) && (initLati - exLati < 0.00000001 || exLati - initLati < 0.00000001))
+        {
+            NMapPathData pathData = new NMapPathData(1);
+            pathData.initPathData();
+            pathData.addPathPoint(127, 37, 0);
+            pathData.endPathData();
+
+            NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+
+            NMapCircleData circleData = new NMapCircleData(1);
+
+            circleData.initCircleData();
+            circleData.addCirclePoint(initLong, initLati, radius); //중심, 반지름 //원생성!!!
+            circleData.endCircleData();
+            pathDataOverlay.addCircleData(circleData);
+
+            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+            circleStyle.setFillColor(0x000000,0x00);
+            circleData.setCircleStyle(circleStyle);
+            return;
+        }
 
         try {
+            double dataDis;
+            int count=0;
+            double sumLong = 0;
+            double sumLati = 0;
+            NGeoPoint circleCenter = new NGeoPoint((initLong),(initLati));
+            Point outPoint = null;
+
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
 
-            for (int i = 0; i < location.length(); i++) {
+            for (int i = 0; i < location.length(); i++) {   //모든 데이터
                 JSONObject c = location.getJSONObject(i);
                 textNum = c.optString(TAG_TEXT_NUM);
                 longitude = c.optString(TAG_LONGITUDE);
                 latitude = c.optString(TAG_LATITUDE);
-                hashtag = c.optString(TAG_HASHTAG);
 
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
-                //Log.e("superdroid", outPoint.toString());
+                outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
+                Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
-                if (outPoint.x <= 1100 && outPoint.y <= 1800) { //화면 안에 보이는 경우
-                    String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
+                if(outPoint.x <= 1100 && outPoint.y <= 1800) {          //화면 안에 보이는 경우
+                    dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+                    Log.i(LOG_TAG,"dataDis = "+dataDis);
 
-                    //잘라진 hashtag들을 HashMap에 저장
-                    for(int j=0;j<split_hashtag.length;j++) {
-                        Iterator<String> iterator = count_hashtag.keySet().iterator();
-                        if(count_hashtag.size() == 0) {
-                            count_hashtag.put(split_hashtag[j], 1);
-                        }
-                        else {
-                            while (iterator.hasNext()) {
-                                String key = iterator.next();
-                                int value = count_hashtag.get(key);
-                                //hashtag와 일치하는 key가 있으면 value+1
-                                if (count_hashtag.containsKey(split_hashtag[j]) == true) {
-                                    count_hashtag.put(split_hashtag[j], count_hashtag.get(split_hashtag[j]) + 1);
-                                    break;
-                                }
-                                //hashtag와 일치하는 key가 없으면 HashMap에 추가
-                                else if (count_hashtag.containsKey(split_hashtag[j]) == false && iterator.hasNext() == false) {
-                                    count_hashtag.put(split_hashtag[j], 1);
-                                    break;
-                                }
-                            }
+                    if(dataDis < radius) { //원 안에 있으면
+                        count++;
+                        sumLong += Double.parseDouble(longitude);
+                        sumLati += Double.parseDouble(latitude);
+
+                        /*불필요*/
+                        NMapPathData pathData = new NMapPathData(1);
+                        pathData.initPathData();
+                        pathData.addPathPoint(127,37,0);
+                        pathData.endPathData();
+
+                        NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+                        if(pathDataOverlay!=null) {
+                            NMapCircleData circleData = new NMapCircleData(1);
+
+                            circleData.initCircleData();
+                            circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
+                            circleData.endCircleData();
+                            pathDataOverlay.addCircleData(circleData);
+
+                            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                            circleStyle.setFillColor(0x000000,0x00);
+                            circleData.setCircleStyle(circleStyle);
                         }
                     }
                 }
 
+                exLong = initLong;
+                exLati = initLati;
+                meanShift(sumLong/count, sumLati/count, radius);
             }
-
-            count_hashtag = sortByValue(count_hashtag);
-
-            //HashMap에서 key가 null값인 데이터 삭제
-            Iterator<String> remove_iterator = count_hashtag.keySet().iterator();
-            while (remove_iterator.hasNext()) {
-                String key = remove_iterator.next();
-
-                if (key.equals("")) {
-                    remove_iterator.remove();
-                }
-            }
-
-            //HashMap Log에 출력
-            Iterator<String> it = count_hashtag.keySet().iterator();
-            while (it.hasNext()) {
-                String key = it.next();
-                int value = count_hashtag.get(key);
-
-                Log.e("superdorid", key + " : " + value);
-            }
-
         } catch (JSONException e){
             e.printStackTrace();
         }
+
     }
-
-    //HashMap sort by Value
-    public static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hashmap) {
-        List<Map.Entry<String, Integer>> list = new LinkedList<>(
-                hashmap.entrySet());
-
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            @Override
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return o1.getValue() > o2.getValue() ? -1 : o1.getValue() < o2.getValue() ? 1:0;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                return false;
-            }
-        });
-
-        HashMap<String, Integer> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-        return sortedMap;
+    protected static double getDistance(double x1, double x2, double y1, double y2) {
+        return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
-
 
     /**
      * 지도가 초기화된 후 호출된다.
@@ -335,7 +345,6 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
         //zoomLevel=mMapController.getZoomLevel();
         //Log.i(LOG_TAG,"zoomLevel = "+zoomLevel);
         //meanShift(127.0541, 37.5228, 500f);
-        meanShift(127.0569, 37.5293, 900f);
     }
 
     /**
@@ -343,9 +352,6 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
-        Log.i(LOG_TAG, "center-longitude : "+String.valueOf(center.longitude));
-        Log.i(LOG_TAG, "center-latitude : "+String.valueOf(center.latitude));
-        //meanShift(center.longitude, center.latitude, 900f);
     }
 
     /**
@@ -378,7 +384,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
             // [[TEMP]] handle a click event of the callout
             //Toast.makeText(MainActivity.this, "onCalloutClick: " + item.getTitle(), Toast.LENGTH_LONG).show();
             Intent intent;
-            intent = new Intent(PopularHashTagActivity.this, TextActivity.class);
+            intent = new Intent(PixelActivity2.this, TextActivity.class);
             startActivity(intent);
         }
 
@@ -423,7 +429,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
 
                     if (countOfOverlappedItems > 1) {
                         String text = countOfOverlappedItems + " overlapped items for " + overlayItem.getTitle();
-                        Toast.makeText(PopularHashTagActivity.this, text, Toast.LENGTH_LONG).show();
+                        Toast.makeText(PixelActivity2.this, text, Toast.LENGTH_LONG).show();
                         return null;
                     }
                 }
@@ -459,7 +465,7 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
             if (errInfo != null) {
                 Log.e(LOG_TAG, "Failed to findPlacemarkAtLocation: error=" + errInfo.toString());
 
-                Toast.makeText(PopularHashTagActivity.this, errInfo.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(PixelActivity2.this, errInfo.toString(), Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -517,14 +523,24 @@ public class PopularHashTagActivity extends NMapActivity implements NMapView.OnM
             protected  void onPostExecute(String result) {
                 Log.i(LOG_TAG, result);
                 myJSON = result;
+                Point searchStartPixel = new Point(0,0);
+                NGeoPoint searchStart = null;
                 //showLog();
+
                 long startTime = System.currentTimeMillis();
-                matchData(127.0569, 37.5293, 900f);;
-                meanShift(127.0569, 37.5293, 900f);
+
+                for(int i=0; i<=1100; i+=550) {
+                    for(int j=0; j<=1800; j+=900) {
+                        searchStartPixel.set(i,j);
+                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                        drawPolygon(searchStart.longitude, searchStart.latitude, 1000f);
+                        meanShift(searchStart.longitude, searchStart.latitude, 1000f);
+                    }
+                }
+
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
-
             }
         }
         getDataJSON g = new getDataJSON();

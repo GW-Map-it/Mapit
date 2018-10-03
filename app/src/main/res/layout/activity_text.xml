@@ -5,46 +5,69 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#393941"
+    android:padding="20dp"
     tools:context=".TextActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="글 작성"
-        android:textSize="25dp"
-        android:layout_margin="10dp"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="내용"
-        android:textSize="20dp"
-        android:layout_margin="10dp"/>
-    <EditText
-        android:id="@+id/editText_hashTag"
-        android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:hint="HashTag를 입력해주세요\nex) #hashtag1 #hashtag2"
+        android:textSize="40dp"
+        android:textColor="#FFFFFF"
         android:layout_margin="10dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp"
+        android:gravity="center">
 
-        <Button
-            android:id="@+id/button_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="취소" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="내용"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF" />
+
+        <EditText
+            android:id="@+id/editText_hashTag"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:padding="20dp"
+            android:background="@drawable/edittext_round"
+            android:maxLines="5"
+            android:layout_gravity="start"
+            android:hint="HashTag를 입력해주세요\nex) #hashtag1 #hashtag2"
+            android:textColor="#000000"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center">
 
         <Button
             android:id="@+id/button_save"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="30dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/button_round"
+            android:textColor="#FFFFFF"
             android:text="저장" />
+
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/button_round"
+            android:textColor="#FFFFFF"
+            android:text="취소" />
+
     </LinearLayout>
 
 </LinearLayout>

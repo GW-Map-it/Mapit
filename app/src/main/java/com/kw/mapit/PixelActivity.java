@@ -309,7 +309,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
         if(isInit){
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
             /*
             meanShift(mapview.getMapController().getMapCenter().longitude,
                     mapview.getMapController().getMapCenter().latitude, 900f);
@@ -322,13 +322,13 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
             NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
 
-            meanShift(LTPoint.longitude,LTPoint.latitude,1000f*level);
-            meanShift(LMPoint.longitude,LMPoint.latitude,1000f*level);
-            meanShift(LBPoint.longitude,LBPoint.latitude,1000f*level);
+            meanShift(LTPoint.longitude,LTPoint.latitude,1000.0F*(15-level));
+            meanShift(LMPoint.longitude,LMPoint.latitude,1000f*(15-level));
+            meanShift(LBPoint.longitude,LBPoint.latitude,1000f*(15-level));
 
-            meanShift(RTPoint.longitude,RTPoint.latitude,1000f*level);
-            meanShift(RMPoint.longitude,RMPoint.latitude,1000f*level);
-            meanShift(RBPoint.longitude,RBPoint.latitude,1000f*level);
+            meanShift(RTPoint.longitude,RTPoint.latitude,1000f*(15-level));
+            meanShift(RMPoint.longitude,RMPoint.latitude,1000f*(15-level));
+            meanShift(RBPoint.longitude,RBPoint.latitude,1000f*(15-level));
 
             Log.i(LOG_TAG, "zoomLevel = "+level);
             Log.i(LOG_TAG, "Z: center-longitude : " + mapview.getMapController().getMapCenter().longitude);
@@ -341,8 +341,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
+        int level = mMapController.getZoomLevel();
+
         if(isInit){
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
+
             //meanShift(center.longitude, center.latitude, 900f);
 
             NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
@@ -353,13 +356,13 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
             NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
 
-            meanShift(LTPoint.longitude,LTPoint.latitude, 1000f);
-            meanShift(LMPoint.longitude,LMPoint.latitude,1000f);
-            meanShift(LBPoint.longitude,LBPoint.latitude,1000f);
+            meanShift(LTPoint.longitude,LTPoint.latitude,1000f*(15-level));
+            meanShift(LMPoint.longitude,LMPoint.latitude,1000f*(15-level));
+            meanShift(LBPoint.longitude,LBPoint.latitude,1000f*(15-level));
 
-            meanShift(RTPoint.longitude,RTPoint.latitude,1000f);
-            meanShift(RMPoint.longitude,RMPoint.latitude,1000f);
-            meanShift(RBPoint.longitude,RBPoint.latitude,1000f);
+            meanShift(RTPoint.longitude,RTPoint.latitude,1000f*(15-level));
+            meanShift(RMPoint.longitude,RMPoint.latitude,1000f*(15-level));
+            meanShift(RBPoint.longitude,RBPoint.latitude,1000f*(15-level));
 
             Log.i(LOG_TAG, "C: center-longitude : " + String.valueOf(center.longitude));
             Log.i(LOG_TAG, "C: center-latitude : " + String.valueOf(center.latitude));

@@ -204,7 +204,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
 
                 // show all path data
-                pathDataOverlay.showAllPathData(0);
+                pathDataOverlay.showAllPathData(mMapController.getZoomLevel());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -241,7 +241,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                     outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
 
-                    if (outPoint.x <= 1100 && outPoint.x >= 0 && outPoint.y >= 0 && outPoint.y <= 1800) { //화면 안에 보이는 경우
+                    if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
                         circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
                         dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
@@ -256,20 +256,22 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
 
                 NMapCircleData circleData = new NMapCircleData(1);
-
                 if(sumLong != initLong || sumLati != initLati) {
                     if( k == location.length() - 1) {
                         circleData.initCircleData();
-                        circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
-                        //circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
+                        //circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
+                        circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
                         circleData.endCircleData();
                         pathDataOverlay.addCircleData(circleData);
 
                         NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
                         circleStyle.setFillColor(0x000000, 0x00);
                         circleData.setCircleStyle(circleStyle);
+
                     }
-                    pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
+                    circleData.setRendered(true);
+
+                    //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
                     sumLong = sumLong / count;
                     sumLati = sumLati / count;
                 }
@@ -293,7 +295,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         if (errorInfo == null) { // success
             mMapController.setMapCenter(
                     new NGeoPoint(127.061, 37.51), 11);
-
+        Log.i(LOG_TAG, "inithandler : zoomlevel = "+mapview.getMapController().getZoomLevel());
         isInit=true;
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
@@ -308,8 +310,25 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     public void onZoomLevelChange(NMapView mapview, int level) {
         if(isInit){
             //mapview.getOverlays().clear();
+            /*
             meanShift(mapview.getMapController().getMapCenter().longitude,
                     mapview.getMapController().getMapCenter().latitude, 900f);
+            */
+            NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
+            NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
+            NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
+
+            NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
+            NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
+            NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
+
+            meanShift(LTPoint.longitude,LTPoint.latitude,1000f*level);
+            meanShift(LMPoint.longitude,LMPoint.latitude,1000f*level);
+            meanShift(LBPoint.longitude,LBPoint.latitude,1000f*level);
+
+            meanShift(RTPoint.longitude,RTPoint.latitude,1000f*level);
+            meanShift(RMPoint.longitude,RMPoint.latitude,1000f*level);
+            meanShift(RBPoint.longitude,RBPoint.latitude,1000f*level);
 
             Log.i(LOG_TAG, "zoomLevel = "+level);
             Log.i(LOG_TAG, "Z: center-longitude : " + mapview.getMapController().getMapCenter().longitude);
@@ -324,7 +343,23 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
         if(isInit){
             //mapview.getOverlays().clear();
-            meanShift(center.longitude, center.latitude, 900f);
+            //meanShift(center.longitude, center.latitude, 900f);
+
+            NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
+            NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
+            NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
+
+            NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
+            NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
+            NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
+
+            meanShift(LTPoint.longitude,LTPoint.latitude, 1000f);
+            meanShift(LMPoint.longitude,LMPoint.latitude,1000f);
+            meanShift(LBPoint.longitude,LBPoint.latitude,1000f);
+
+            meanShift(RTPoint.longitude,RTPoint.latitude,1000f);
+            meanShift(RMPoint.longitude,RMPoint.latitude,1000f);
+            meanShift(RBPoint.longitude,RBPoint.latitude,1000f);
 
             Log.i(LOG_TAG, "C: center-longitude : " + String.valueOf(center.longitude));
             Log.i(LOG_TAG, "C: center-latitude : " + String.valueOf(center.latitude));
@@ -498,18 +533,31 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 }
             }
             protected  void onPostExecute(String result) {
+                NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
+                NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
+                NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
+
+                NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
+                NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
+                NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
+
                 myJSON = result;
 
                 long startTime = System.currentTimeMillis();
+
                 matchData();
-                meanShift(127.0569, 37.5293, 900f);
+                meanShift(LTPoint.longitude, LTPoint.latitude, 1000f);
+
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
 
-                meanShift(127.0483,37.4713,900f);
-                meanShift(127.0186,37.5094,900f);
-                meanShift(127.0433, 37.5808,900f);
+                meanShift(LMPoint.longitude,LMPoint.latitude,1000f);
+                meanShift(LBPoint.longitude,LBPoint.latitude,1000f);
+
+                meanShift(RTPoint.longitude,RTPoint.latitude,1000f);
+                meanShift(RMPoint.longitude,RMPoint.latitude,1000f);
+                meanShift(RBPoint.longitude,RBPoint.latitude,1000f);
             }
         }
         getDataJSON g = new getDataJSON();

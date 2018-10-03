@@ -44,6 +44,13 @@
         android:onClick="myClick"/>
 
     <Button
+        android:id="@+id/gps"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="GPS"
+        android:onClick="myClick"/>
+
+    <Button
         android:id="@+id/main_map"
         android:layout_width="250dp"
         android:layout_height="wrap_content"

@@ -24,6 +24,8 @@ public class GoogleLoginActivity extends Activity implements GoogleApiClient.Con
 
     ImageButton gLogin = null;
     String userName = null;
+    String userId = null;
+    String userEmail = null;
     TextView text = null;
 
     @Override
@@ -79,10 +81,14 @@ public class GoogleLoginActivity extends Activity implements GoogleApiClient.Con
                 //디스플레이 아이디 : currentPerson.getId());
                 userName = currentPerson.getDisplayName();
             }
+            if(currentPerson.hasId()) {
+                userId = currentPerson.getId();
+            }
 
             //InputData 액티비티로 이동
             Intent intent = new Intent(this, InputDataActivity.class);
             intent.putExtra("NAME", userName);
+            intent.putExtra("ID", userId);
             startActivity(intent);
         }
     }

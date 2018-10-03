@@ -61,12 +61,13 @@ public class InputDataActivity extends AppCompatActivity {
         loginEmail.setText(userEmail);
 
         //Intent로 사용자 아이디 불러오기
-        Intent nameIntent = getIntent();
-        if (nameIntent != null) {
-            String name = nameIntent.getStringExtra("NAME");
+        Intent googleIntent = getIntent();
+        if (googleIntent != null) {
+            String name = googleIntent.getStringExtra("NAME");
+            String id = googleIntent.getStringExtra("ID");
 
-            loginId.setText(name);
-
+            //loginId.setText(name);
+            loginId.setText(id);
         }
     }
 

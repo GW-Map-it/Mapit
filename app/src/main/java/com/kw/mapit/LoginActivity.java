@@ -2,11 +2,8 @@ package com.kw.mapit;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,14 +23,10 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
+import com.kakao.usermgmt.LoginButton;
 import com.kakao.util.exception.KakaoException;
-import com.nhn.android.maps.overlay.NMapPathData;
-import com.nhn.android.maps.overlay.NMapPathLineStyle;
-import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,8 +36,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
 
 import static com.kakao.util.helper.Utility.getPackageInfo;
@@ -67,13 +58,13 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
     private static final String TAG_USER_PASSWORD = "password";
 
     private static final String LOG_TAG = "LOGIN";
-    StringBuffer sbParams = null;
 
     String user_id;
     String user_password;
 
     EditText edit_id;
     EditText edit_pw;
+    LoginButton kakao_sign_in;
 
     JSONArray userData = null;
 
@@ -86,6 +77,7 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
 
         edit_id= (EditText)findViewById(R.id.ed_login_id);
         edit_pw= (EditText)findViewById(R.id.ed_login_password);
+        kakao_sign_in = (LoginButton)findViewById(R.id.btn_kakao_sign_in);
 
         //EditText 글자 색 : 검정
         edit_id.setTextColor(Color.BLACK);
@@ -138,11 +130,8 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
         }
 
         //Kakao Api 회원가입
-        else if(v.getId() == R.id.btn_kakao_sign_in) {
-            //Intent goIntent = new Intent(this, KakaoLoginActivity.class);
-            //startActivity(goIntent);
-
-
+        else if(v.getId() == R.id.iv_kakao_sign_in) {
+            kakao_sign_in.performClick();
         }
 
         //자체 회원가입

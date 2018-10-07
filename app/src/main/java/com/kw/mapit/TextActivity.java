@@ -1,5 +1,6 @@
 package com.kw.mapit;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -7,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,7 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
-public class TextActivity extends AppCompatActivity {
+public class TextActivity extends Activity {
     String myJSON;
 
     private static final String LOG_TAG = "TEXTViewer";
@@ -48,6 +49,7 @@ public class TextActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_text);
 
         EditText_HashTag = (EditText)findViewById(R.id.editText_hashTag);
@@ -57,51 +59,53 @@ public class TextActivity extends AppCompatActivity {
         latitude = intent.getExtras().getString("latitude");
         longitude = intent.getExtras().getString("longitude");
 
-        //Click "Save" Button
-        findViewById(R.id.button_save).setOnClickListener(
-                new Button.OnClickListener() {
-                    public void onClick(View v){
-                        String hashtag = EditText_HashTag.getText().toString();
-                        sbParams = new StringBuffer();
-                        sbParams.append("hashtag=").append(" " + hashtag);
-                        sbParams.append("&").append("longitude=").append(longitude);
-                        sbParams.append("&").append("latitude=").append(latitude);
+    }
 
-                        InsertData task = new InsertData();
-                        String result = null;
-                        try {
-                            result = task.execute(hashtag).get();
+    public void onClick(View v) {
+        //"저장" 클릭 시
+        if(v.getId() == R.id.button_save) {
+            String hashtag = EditText_HashTag.getText().toString();
+            sbParams = new StringBuffer();
+            sbParams.append("hashtag=").append(" " + hashtag);
+            sbParams.append("&").append("longitude=").append(longitude);
+            sbParams.append("&").append("latitude=").append(latitude);
 
-                            //DB에 사용자 정보 저장 성공 시
-                            if(result.contains("success")) {
-                                EditText_HashTag.setText("");
+            InsertData task = new InsertData();
+            String result = null;
+            try {
+                result = task.execute(hashtag).get();
 
-                                Intent intent;
-                                intent = new Intent(TextActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                TextActivity.this.finish();
+                //DB에 사용자 정보 저장 성공 시
+                if(result.contains("success")) {
+                    EditText_HashTag.setText("");
 
-                                //이전 DbConnectActivity 종료
-                                NMapActivity activity = (NMapActivity)DbConnectActivity.activity_dbConnect;
-                                activity.finish();
+                    Intent intent;
+                    intent = new Intent(TextActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    TextActivity.this.finish();
 
-                                Toast.makeText(getApplicationContext(), "게시물 등록 성공!", Toast.LENGTH_LONG).show();
-                            }
-                            //DB에 사용자 정보 저장 실패 시
-                            else if(result.contains("Error")) {
-                                Toast.makeText(getApplicationContext(), "게시물 등록 실패..", Toast.LENGTH_LONG).show();
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }
+                    //이전 DbConnectActivity 종료
+                    NMapActivity activity = (NMapActivity)DbConnectActivity.activity_dbConnect;
+                    activity.finish();
 
-                        EditText_HashTag.setText("");
-
-                    }
+                    Toast.makeText(getApplicationContext(), "게시물 등록 성공!", Toast.LENGTH_LONG).show();
                 }
-        );
+                //DB에 사용자 정보 저장 실패 시
+                else if(result.contains("Error")) {
+                    Toast.makeText(getApplicationContext(), "게시물 등록 실패..", Toast.LENGTH_LONG).show();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            EditText_HashTag.setText("");
+        }
+        //"취소" 클릭 시
+        else if(v.getId() == R.id.button_cancel) {
+            finish();
+        }
     }
 
     class InsertData extends AsyncTask<String, Void, String> {

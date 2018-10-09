@@ -57,7 +57,8 @@
             android:layout_height="30dp"
             android:background="@drawable/button_round"
             android:textColor="#FFFFFF"
-            android:text="취소" />
+            android:text="취소"
+            android:onClick="onClick"/>
 
         <Button
             android:id="@+id/button_save"
@@ -66,7 +67,8 @@
             android:layout_marginRight="15dp"
             android:background="@drawable/button_round"
             android:textColor="#FFFFFF"
-            android:text="저장" />
+            android:text="저장"
+            android:onClick="onClick"/>
 
     </LinearLayout>
 

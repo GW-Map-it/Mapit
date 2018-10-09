@@ -180,9 +180,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             e.printStackTrace();
         }
     }
-    protected void drawPolygon(double initLong, double initLati, float radius){ //점, 원 그려준다
+    protected void matchData(){ //데이터를 점에 매칭
         try {
-
             JSONObject jsonObj = new JSONObject(myJSON);
             location = jsonObj.getJSONArray(TAG_RESULTS);
 
@@ -192,31 +191,27 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 longitude = c.optString(TAG_LONGITUDE);
                 latitude = c.optString(TAG_LATITUDE);
 
-                // set path data points
-                NMapPathData pathData = new NMapPathData(9);
+                Point outPoint = null;
+                NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
+                Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
-                pathData.initPathData();
-                pathData.addPathPoint(Double.parseDouble(longitude), Double.parseDouble(latitude), NMapPathLineStyle.TYPE_SOLID);
-                pathData.addPathPoint(Double.parseDouble(longitude)+0.00001, Double.parseDouble(latitude)+0.00001, 0);
-                pathData.endPathData();
+                if(outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) {
+                    // set path data points
+                    NMapPathData pathData = new NMapPathData(1);
 
-                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+                    //데이터 위치 점 찍어주는 부분
+                    pathData.initPathData();
+                    pathData.addPathPoint(Float.parseFloat(longitude), Float.parseFloat(latitude), NMapPathLineStyle.TYPE_SOLID);
+                    pathData.addPathPoint(Float.parseFloat(longitude) + 0.00001, Float.parseFloat(latitude) + 0.00001, 0);
+                    pathData.endPathData();
 
-                if (pathDataOverlay != null) {
-                    // add circle data
-                    NMapCircleData circleData = new NMapCircleData(1);
-                    circleData.initCircleData();
-                    //circleData.addCirclePoint(initLong, initLati, radius);
+                    NMapPathLineStyle pathLineStyle = new NMapPathLineStyle(mMapView.getContext());
+                    pathLineStyle.setLineColor(0xA04DD2, 0xff);
+                    pathLineStyle.setFillColor(0xFFFFFF, 0x00);
+                    pathData.setPathLineStyle(pathLineStyle);
 
-                    //circleData.addCirclePoint(127.0541, 37.5228,500f); //초기위치
-                    circleData.endCircleData();
-
-                    pathDataOverlay.addCircleData(circleData);
-                    // set circle style
-                    NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                    circleStyle.setLineType(NMapPathLineStyle.TYPE_SOLID);
-                    circleStyle.setFillColor(0x000002, 0x22);
-                    circleData.setCircleStyle(circleStyle);
+                    NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
 
                     // show all path data
                     pathDataOverlay.showAllPathData(0);
@@ -226,6 +221,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             e.printStackTrace();
         }
     }
+
     protected void meanShift(double initLong, double initLati, float radius) {
         //원의 중심, 원의 반지름, 점의 위치(알고 있음)
         //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
@@ -521,19 +517,19 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 }
             }
             protected  void onPostExecute(String result) {
-                Log.i(LOG_TAG, result);
                 myJSON = result;
-                Point searchStartPixel = new Point(0,0);
-                NGeoPoint searchStart = null;
-                //showLog();
+                NGeoPoint searchStart;//지도좌표
 
+                //초기 위치를 아주 크게 해서 meanShift의 처음 if에서 걸리지 않게 함
+                exLong = 10000000;
+                exLati = 10000000;
+
+                matchData();
                 long startTime = System.currentTimeMillis();
 
                 for(int i=0; i<=1100; i+=550) {
                     for(int j=0; j<=1800; j+=900) {
-                        searchStartPixel.set(i,j);
-                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                        drawPolygon(searchStart.longitude, searchStart.latitude, 1000f);
+                        searchStart = mMapView.getMapProjection().fromPixels(i, j);
                         meanShift(searchStart.longitude, searchStart.latitude, 1000f);
                     }
                 }

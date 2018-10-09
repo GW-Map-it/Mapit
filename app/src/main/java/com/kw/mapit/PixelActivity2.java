@@ -52,11 +52,11 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     String longitude;
     String latitude;
 
-    //이전의 원의 중심 127.0541, 37.5228
-    private double exLong=127.0541;
-    private double exLati=37.5228;
+    private double exLong;
+    private double exLati;
 
     JSONArray location = null;
+    boolean isInit=false;
 
     // API-KEY
     public static final String API_KEY = "29AIQje_U7muB8tVyofe";  //<---맨위에서 발급받은 본인 ClientID 넣으세요.
@@ -180,6 +180,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             e.printStackTrace();
         }
     }
+
     protected void matchData(){ //데이터를 점에 매칭
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
@@ -272,7 +273,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
                 Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
-                if(outPoint.x <= 1100 && outPoint.y <= 1800) {          //화면 안에 보이는 경우
+                if(outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) {          //화면 안에 보이는 경우
                     dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
                     Log.i(LOG_TAG,"dataDis = "+dataDis);
 
@@ -312,9 +313,6 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
 
     }
-    protected static double getDistance(double x1, double x2, double y1, double y2) {
-        return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-    }
 
     /**
      * 지도가 초기화된 후 호출된다.
@@ -326,6 +324,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         if (errorInfo == null) { // success
             mMapController.setMapCenter(
                     new NGeoPoint(127.061, 37.51), 11);
+
+            isInit=true;
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
                     + errorInfo.toString());
@@ -337,17 +337,42 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
-        //int zoomLevel;
-        //zoomLevel=mMapController.getZoomLevel();
-        //Log.i(LOG_TAG,"zoomLevel = "+zoomLevel);
-        //meanShift(127.0541, 37.5228, 500f);
+        if(isInit){
+            mapview.getOverlays().clear();
+
+            NGeoPoint searchStart;
+            matchData();
+
+            for(int i=0; i<=1100; i+=550) {
+                for(int j=0; j<=1800; j+=900) {
+                    searchStart = mMapView.getMapProjection().fromPixels(550, 900);
+                    meanShift(searchStart.longitude, searchStart.latitude, 1000f*(1/level));
+                }
+            }
+        }
     }
 
     /**
      * 지도 중심 변경 시 호출되며 변경된 중심 좌표가 파라미터로 전달된다.
      */
     @Override
-    public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
+    public void onMapCenterChange(NMapView mapview, NGeoPoint center)
+    {
+        int level = mMapController.getZoomLevel();
+
+        if(isInit){
+            mapview.getOverlays().clear();
+
+            NGeoPoint searchStart;
+            matchData();
+
+            for(int i=0; i<=1100; i+=550) {
+                for(int j=0; j<=1800; j+=900) {
+                    searchStart = mMapView.getMapProjection().fromPixels(i, j);
+                    meanShift(searchStart.longitude, searchStart.latitude, 1000f*(1/level));
+                }
+            }
+        }
     }
 
     /**
@@ -362,6 +387,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
     @Override
     public void onMapCenterChangeFine(NMapView arg0) {
+
     }
 
     public NMapCalloutOverlay onCreateCalloutOverlay(NMapOverlay itemOverlay, NMapOverlayItem overlayItem, Rect itemBounds) {
@@ -503,16 +529,16 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 try {
                     URL url = new URL(uri);
 
-                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     StringBuilder sb = new StringBuilder();
 
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String json;
-                    while((json = bufferedReader.readLine())!=null){
-                        sb.append(json+"\n");
+                    while ((json = bufferedReader.readLine()) != null) {
+                        sb.append(json + "\n");
                     }
                     return sb.toString().trim();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     return null;
                 }
             }

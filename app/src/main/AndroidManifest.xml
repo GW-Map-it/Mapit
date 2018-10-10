@@ -32,7 +32,9 @@
         <activity android:name=".GoogleLogin2Activity" />
         <activity android:name=".KakaoSignupActivity" />
         <activity android:name=".DbConnectActivity" />
-        <activity android:name=".TextActivity" android:theme="@style/Theme.AppCompat.Dialog"/>
+        <activity
+            android:name=".TextActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
         <activity android:name=".PixelActivity" />
         <activity android:name=".PixelActivity2" />
         <activity android:name=".InputDataActivity" />
@@ -43,6 +45,8 @@
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
+
+        <activity android:name=".MeanShiftActivity"></activity>
     </application>
 
 </manifest>

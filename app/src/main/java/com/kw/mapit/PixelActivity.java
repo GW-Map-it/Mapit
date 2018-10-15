@@ -204,7 +204,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
 
                 // show all path data
-                pathDataOverlay.showAllPathData(mMapController.getZoomLevel());
+                // pathDataOverlay.showAllPathData(mMapController.getZoomLevel());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -269,12 +269,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         circleData.setCircleStyle(circleStyle);
 
                     }
-                    circleData.setRendered(true);
+                    //circleData.setRendered(true);
 
                     //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
                     sumLong = sumLong / count;
                     sumLati = sumLati / count;
-                }
+               }
             }
 
             Log.i(LOG_TAG,"마지막 중심좌표! = " + sumLong + " , " + sumLati);
@@ -315,7 +315,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             float radius=0;
             float meters;
 
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
             /*
             meanShift(mapview.getMapController().getMapCenter().longitude,
                     mapview.getMapController().getMapCenter().latitude, 900f);
@@ -338,126 +338,49 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     break;
                 case 3:
                     radius = 300000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 4:
                     radius = 150000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 5:
                     radius = 70000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 6:
                     radius = 38000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 7:
                     radius = 18000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 8:
                     radius = 9000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 9:
                     radius = 4500F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 10:
                     radius = 2500F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 11:
                     radius = 1200F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 12:
                     radius = 600F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 13:
                     radius = 300F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 14:
                     radius = 200F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
             }
-
+            //6번 meanshift 돌림
+            for(int i=0; i<=1100; i+=1100) {
+                for(int j=0; j<=1800; j+=900) {
+                    searchStartPixel.set(i,j);
+                    searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                    meanShift(searchStart.longitude, searchStart.latitude, radius);
+                }
+            }
             meters = mMapView.getMapProjection().metersToPixels(radius);
 
             Log.i(LOG_TAG, "현재 원크기 = "+radius);
@@ -481,7 +404,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             int s_level=mapview.getMapController().getZoomLevel();
             float radius=0;
 
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
             NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
             NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
             NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
@@ -500,124 +423,48 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     break;
                 case 3:
                     radius = 300000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 4:
                     radius = 150000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 5:
                     radius = 70000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 6:
                     radius = 38000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 7:
                     radius = 18000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 8:
                     radius = 9000F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 9:
                     radius = 4500F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 10:
                     radius = 2500F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 11:
                     radius = 1200F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 12:
                     radius = 600F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 13:
                     radius = 300F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
                 case 14:
                     radius = 200F;
-                    for(int i=0; i<=1100; i+=1100) {
-                        for(int j=0; j<=1800; j+=900) {
-                            searchStartPixel.set(i,j);
-                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                            meanShift(searchStart.longitude, searchStart.latitude, radius);
-                        }
-                    }
                     break;
+            }
+            //6번 meanshift 돌림
+            for(int i=0; i<=1100; i+=1100) {
+                for(int j=0; j<=1800; j+=900) {
+                    searchStartPixel.set(i,j);
+                    searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                    meanShift(searchStart.longitude, searchStart.latitude, radius);
+                }
             }
             Log.i(LOG_TAG, "C: center-longitude : " + String.valueOf(center.longitude));
             Log.i(LOG_TAG, "C: center-latitude : " + String.valueOf(center.latitude));
@@ -791,6 +638,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 }
             }
             protected  void onPostExecute(String result) {
+                myJSON = result;
                 NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
                 NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
                 NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
@@ -799,23 +647,29 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
                 NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
 
-                myJSON = result;
-
                 long startTime = System.currentTimeMillis();
 
                 matchData();
-                meanShift(LTPoint.longitude, LTPoint.latitude, 1000f);
+                meanShift(LTPoint.longitude, LTPoint.latitude, 1200F);
 
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
 
-                meanShift(LMPoint.longitude,LMPoint.latitude,1000f);
-                meanShift(LBPoint.longitude,LBPoint.latitude,1000f);
+                meanShift(LMPoint.longitude,LMPoint.latitude,1200F);
+                meanShift(LBPoint.longitude,LBPoint.latitude,1200F);
 
-                meanShift(RTPoint.longitude,RTPoint.latitude,1000f);
-                meanShift(RMPoint.longitude,RMPoint.latitude,1000f);
-                meanShift(RBPoint.longitude,RBPoint.latitude,1000f);
+                meanShift(RTPoint.longitude,RTPoint.latitude,1200F);
+                meanShift(RMPoint.longitude,RMPoint.latitude,1200F);
+                meanShift(RBPoint.longitude,RBPoint.latitude,1200F);
+
+//                for(int i=0; i<=1100; i+=1100) {
+//                    for(int j=0; j<=1800; j+=900) {
+//                        searchStartPixel.set(i,j);
+//                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+//                        meanShift(searchStart.longitude, searchStart.latitude, radius);
+//                    }
+//                }
             }
         }
         getDataJSON g = new getDataJSON();

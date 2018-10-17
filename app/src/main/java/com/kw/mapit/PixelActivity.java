@@ -493,7 +493,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             float radius=0;
             float meters;
 
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
             /*
             meanShift(mapview.getMapController().getMapCenter().longitude,
                     mapview.getMapController().getMapCenter().latitude, 900f);
@@ -576,7 +576,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             int s_level=mapview.getMapController().getZoomLevel();
             float radius=0;
 
-            //mapview.getOverlays().clear();
+            mapview.getOverlays().clear();
             centerList.clear();
 
             switch(s_level){
@@ -805,37 +805,24 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             }
             protected  void onPostExecute(String result) {
                 myJSON = result;
-                NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
-                NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
-                NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
+                Point searchStartPixel = new Point(0,0);
+                NGeoPoint searchStart = null;
 
-                NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
-                NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
-                NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
-
+                /* 시간재는 부분
                 long startTime = System.currentTimeMillis();
-
-                matchData();
-                getHashtag(LTPoint.longitude, LTPoint.latitude, 1200F);
-
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
+                */
 
-                getHashtag(LMPoint.longitude,LMPoint.latitude,1200F);
-                getHashtag(LBPoint.longitude,LBPoint.latitude,1200F);
-
-                getHashtag(RTPoint.longitude,RTPoint.latitude,1200F);
-                getHashtag(RMPoint.longitude,RMPoint.latitude,1200F);
-                getHashtag(RBPoint.longitude,RBPoint.latitude,1200F);
-
-//                for(int i=0; i<=1100; i+=1100) {
-//                    for(int j=0; j<=1800; j+=900) {
-//                        searchStartPixel.set(i,j);
-//                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-//                        meanShift(searchStart.longitude, searchStart.latitude, radius);
-//                    }
-//                }
+                matchData();
+                for(int i=0; i<=1100; i+=1100) {
+                    for(int j=0; j<=1800; j+=900) {
+                        searchStartPixel.set(i,j);
+                        searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                        getHashtag(searchStart.longitude, searchStart.latitude, 1200F);
+                    }
+                }
             }
         }
         getDataJSON g = new getDataJSON();

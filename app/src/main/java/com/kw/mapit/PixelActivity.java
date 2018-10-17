@@ -41,6 +41,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -50,6 +51,9 @@ import java.util.Random;
 
 public class PixelActivity extends NMapActivity implements NMapView.OnMapStateChangeListener {
     String myJSON;
+
+    //ArrayList<double> centerList = new ArrayList<double>();
+    ArrayList<dupCenter> centerList = new ArrayList<>(); //겹침원  없게 중심점 모아둘 리스트
 
     private static final String TAG_RESULTS = "result";
     private static final String TAG_TEXT_NUM = "text_num";
@@ -63,6 +67,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     String hashtag;
 
     HashMap<String, Integer> count_hashtag;
+    String[] popular_hash;
 
     boolean isInit=false;
 
@@ -180,28 +185,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
         else if(v.getId() == R.id.btn_nextActivity) {
             Intent intent = new Intent(this, HashPopularActivity.class);
-            intent.putExtra("POPULAR_HASHTAG", count_hashtag);
+            intent.putExtra("POPULAR_HASHTAG", popular_hash);
             startActivity(intent);
-        }
-    }
-
-    protected   void showLog() {
-        try {
-            JSONObject jsonObj = new JSONObject(myJSON);
-            location = jsonObj.getJSONArray(TAG_RESULTS);
-
-            for(int i=0; i<location.length(); i++) {
-                JSONObject c = location.getJSONObject(i);
-                textNum = c.optString(TAG_TEXT_NUM);
-                longitude = c.optString(TAG_LONGITUDE);
-                latitude = c.optString(TAG_LATITUDE);
-
-                Log.i(LOG_TAG, "text_num = "+textNum);
-                Log.i(LOG_TAG, "longitude = "+longitude);
-                Log.i(LOG_TAG, "latitude = "+latitude);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
@@ -291,23 +276,34 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NMapCircleData circleData = new NMapCircleData(1);
                 if(sumLong != initLong || sumLati != initLati) {
                     if( k == location.length() - 1) {
-                        circleData.initCircleData();
-                        //circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
-                        circleData.addCirclePoint(sumLong / count, sumLati / count, radius); //중심, 반지름 //원생성!!!
-                        circleData.endCircleData();
-                        pathDataOverlay.addCircleData(circleData);
+                        //for(int i=0; i<centerList.size(); i++) {
+                          //  if(centerList.get(i).longitude - sumLong > 100 && centerList.get(i).latitude - sumLati > 100 ) { //너무 겹치는 원은 안그릴 것 기준은 임의로 100으로 줌
+                                circleData.initCircleData();
+                                //circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
+                                //원 크기 데이터의 양에 따라 다르게 해야 함
+                                //지금 나오는 원 크기를 가장 데이터가 많을 때의 크기(max)로 잡고 더 작아지게 만들어줄 것
+                                if(radius-count > 1){
+                                    circleData.addCirclePoint(sumLong / count, sumLati / count, radius-count);
+                                }else{
+                                    //데이터 양이 원 크기보다 커지는 경우
+                                }
+                                circleData.endCircleData();
+                                pathDataOverlay.addCircleData(circleData);
 
-                        NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                        //랜덤 색깔
-                        Random rand = new Random();
-                        int myRandomNumber = rand.nextInt(0xffffff);
+                                NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                                //랜덤 색깔
+                                Random rand = new Random();
+                                int myRandomNumber = rand.nextInt(0xffffff);
 
-                        Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-                        System.out.printf("%x\n",myRandomNumber);
-                        circleStyle.setFillColor(myRandomNumber,0x22);
-                        circleStyle.setStrokeColor(myRandomNumber,0xaa);
-                        circleData.setCircleStyle(circleStyle);
+                                Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+                                System.out.printf("%x\n",myRandomNumber);
+                                circleStyle.setFillColor(myRandomNumber,0x22);
+                                circleStyle.setStrokeColor(myRandomNumber,0xaa);
+                                circleData.setCircleStyle(circleStyle);
 
+                                //centerList.add(new dupCenter(sumLong,sumLati));
+                           // }
+                      //  }
                     }
                     //circleData.setRendered(true);
 
@@ -345,15 +341,14 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     //인기 해시태그 Pick
     protected void getHashtag(double initLong, double initLati, float radius) {
-        //원의 중심, 원의 반지름, 점의 위치(알고 있음)
-        //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
-        //작으면 안에 포함되어 있는 점이라고 생각
 
         Point outPoint = null;
         count_hashtag = new HashMap<>();
         int total_text_num = 0;
         int total_sum = 0;
         double total_percent;
+        int popular_index = 0;
+        popular_hash = new String[10];
 
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
@@ -370,7 +365,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
-                //Log.e("superdroid", outPoint.toString());
+                Log.e("superdroid", outPoint.toString());
 
                 if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
                     String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
@@ -423,7 +418,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 //전체 hashtag 개수 계산
                 total_sum += value;
 
-                Log.e("superdorid", key + " : " + value);
+                //Log.e("superdorid", key + " : " + value);
             }
 
             //전체 개수의 70%인 hashtag 개수
@@ -446,7 +441,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     if(value >= hashtag_percent) {
                         Log.e("superdorid", "(15%)" + key + " : " + value);
 
-                        meanShift(initLong,initLati,1000f, key);
+                        popular_hash[popular_index] = key;
+                        popular_index++;
+                        //tagList.add(key);
+                        meanShift(initLong,initLati,radius, key);
                     }
                 }
             }
@@ -495,18 +493,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             float radius=0;
             float meters;
 
-            mapview.getOverlays().clear();
+            //mapview.getOverlays().clear();
             /*
             meanShift(mapview.getMapController().getMapCenter().longitude,
                     mapview.getMapController().getMapCenter().latitude, 900f);
             */
-            NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
-            NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
-            NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
-
-            NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
-            NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
-            NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
+            centerList.clear();
 
             switch(s_level){
                 case 1:
@@ -584,14 +576,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             int s_level=mapview.getMapController().getZoomLevel();
             float radius=0;
 
-            mapview.getOverlays().clear();
-            NGeoPoint LTPoint = mMapView.getMapProjection().fromPixels(0,0);
-            NGeoPoint LMPoint = mMapView.getMapProjection().fromPixels(0,900);
-            NGeoPoint LBPoint = mMapView.getMapProjection().fromPixels(0, 1800);
-
-            NGeoPoint RTPoint = mMapView.getMapProjection().fromPixels(1100,0);
-            NGeoPoint RMPoint = mMapView.getMapProjection().fromPixels(1100,900);
-            NGeoPoint RBPoint = mMapView.getMapProjection().fromPixels(1100,1800);
+            //mapview.getOverlays().clear();
+            centerList.clear();
 
             switch(s_level){
                 case 1:

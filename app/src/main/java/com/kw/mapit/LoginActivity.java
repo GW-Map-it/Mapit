@@ -185,7 +185,7 @@ public class LoginActivity extends Activity implements GoogleApiClient.Connectio
             myJSON = result;
 
             if(result.equalsIgnoreCase("true")) {               //로그인 성공 시
-                Intent goIntent = new Intent(LoginActivity.this, DbConnectActivity.class);
+                Intent goIntent = new Intent(LoginActivity.this, PixelActivity.class);
                 startActivity(goIntent);
                 LoginActivity.this.finish();
 

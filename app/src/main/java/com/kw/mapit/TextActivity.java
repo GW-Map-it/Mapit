@@ -80,7 +80,7 @@ public class TextActivity extends Activity {
                     EditText_HashTag.setText("");
 
                     Intent intent;
-                    intent = new Intent(TextActivity.this, MainActivity.class);
+                    intent = new Intent(TextActivity.this, PixelActivity.class);
                     startActivity(intent);
                     TextActivity.this.finish();
 

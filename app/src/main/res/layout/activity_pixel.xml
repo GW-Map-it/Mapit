@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,4 +18,28 @@
 
     </LinearLayout>
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/btn_nextActivity"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="top|right"
+        android:paddingTop="20dp"
+        android:paddingRight="20dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/img_next_activity"
+        android:onClick="onClick"/>
+
+    <ImageButton
+        android:id="@+id/btn_addText"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom|right"
+        android:paddingBottom="20dp"
+        android:paddingRight="20dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/img_addtext"
+        android:onClick="onClick"/>
+
+</FrameLayout>

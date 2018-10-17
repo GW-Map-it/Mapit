@@ -58,10 +58,13 @@
         android:onClick="myClick"/>
 
     <Button
-        android:id="@+id/main_map"
+        android:id="@+id/mapit"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="Main Map"
+        android:layout_marginTop="30dp"
+        android:background="#5555FF"
+        android:textColor="#FFFFFF"
+        android:text="Mapit"
         android:onClick="myClick"/>
 
 

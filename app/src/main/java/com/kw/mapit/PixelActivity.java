@@ -229,7 +229,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      * 원과 점 사이의 거리로 원 안의 포함여부 계산한다
      * meanshift로 원 위치 계속 옮기고 마지막 한 번만 그리는 알고리즘
      */
-    protected void meanShift(double initLong, double initLati, float radius, String hash) {
+    protected void meanShift(double initLong, double initLati, float radius, String hash, double percent) {
         double dataDis;
         double sumLong = initLong;         //원 안에 속한 점이면 계속 더해줄 위도
         double sumLati = initLati;         //원 안에 속한 점이면 계속 더해줄 경도
@@ -270,6 +270,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         }
                     }
                 }
+                /* 여기로 옮겨도 로직에 문제없을까 */
+                sumLong = sumLong / count;
+                sumLati = sumLati / count;
 
                 NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
 
@@ -277,48 +280,65 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 if(sumLong != initLong || sumLati != initLati) {
                     if( k == location.length() - 1) {
                         //for(int i=0; i<centerList.size(); i++) {
-                          //  if(centerList.get(i).longitude - sumLong > 100 && centerList.get(i).latitude - sumLati > 100 ) { //너무 겹치는 원은 안그릴 것 기준은 임의로 100으로 줌
-                                circleData.initCircleData();
-                                //circleData.addCirclePoint(sumLong / count, sumLati / count, radius * (count/5)); //중심, 반지름 //원생성!!!
-                                //원 크기 데이터의 양에 따라 다르게 해야 함
-                                //지금 나오는 원 크기를 가장 데이터가 많을 때의 크기(max)로 잡고 더 작아지게 만들어줄 것
-                                if(radius-count > 1){
-                                    circleData.addCirclePoint(sumLong / count, sumLati / count, radius-count);
-                                }else{
-                                    //데이터 양이 원 크기보다 커지는 경우
-                                }
-                                circleData.endCircleData();
-                                pathDataOverlay.addCircleData(circleData);
+                        //Log.i(LOG_TAG,"centerList size : "+String.valueOf(centerList.size()));
+                        //  if(centerList.get(i).longitude - sumLong > 10 && centerList.get(i).latitude - sumLati > 10 ) { //너무 겹치는 원은 안그릴 것 기준은 임의로 10으로 줌
+                        circleData.initCircleData();
+                        //circleData.addCirclePoint(sumLong, sumLati, radius); //중심, 반지름 //원생성!!!
 
-                                NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                                //랜덤 색깔
-                                Random rand = new Random();
-                                int myRandomNumber = rand.nextInt(0xffffff);
+                        //원 크기 데이터의 양에 따라 다르게 해야 함
+                        //지금 나오는 원 크기를 가장 데이터가 많을 때의 크기(max)로 잡고 더 작아지게 만들어줄 것
+                        //데이터 양 퍼센테이지. 어차피 15%까지는 나오지 않는다. 15~25, 25~35, 35~45, 45~55, 55~65, 75~85, 85~95. 95~100 총 8개로 구간 나눠서 반지름 정해준다
+                        //Log.i(LOG_TAG,"percent="+percent);
+                        if(percent>15 && percent<=25){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.2));
+                        }else if(percent>25 && percent<=35){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.3));
+                        }else if(percent>35 && percent<=45){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.4));
+                        }else if(percent>45 && percent<=55){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.5));
+                        }else if(percent>55 && percent<=65){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.6));
+                        }else if(percent>65 && percent<=75){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.7));
+                        }else if(percent>75 && percent<=85){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.8));
+                        }else if(percent>85 && percent<=95){
+                            circleData.addCirclePoint(sumLong , sumLati , (float)(radius*0.9));
+                        }else if(percent>95 && percent<=100){
+                            circleData.addCirclePoint(sumLong , sumLati , radius*1);
+                        }
 
-                                Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-                                System.out.printf("%x\n",myRandomNumber);
-                                circleStyle.setFillColor(myRandomNumber,0x22);
-                                circleStyle.setStrokeColor(myRandomNumber,0xaa);
-                                circleData.setCircleStyle(circleStyle);
+                    circleData.endCircleData();
+                    pathDataOverlay.addCircleData(circleData);
 
-                                //centerList.add(new dupCenter(sumLong,sumLati));
-                           // }
-                      //  }
-                    }
-                    //circleData.setRendered(true);
+                    NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+                    //랜덤 색깔
+                    Random rand = new Random();
+                    int myRandomNumber = rand.nextInt(0xffffff);
 
-                    //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
-                    sumLong = sumLong / count;
-                    sumLati = sumLati / count;
+                    Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+                    System.out.printf("%x\n",myRandomNumber);
+                    circleStyle.setFillColor(myRandomNumber,0x22);
+                    circleStyle.setStrokeColor(myRandomNumber,0xaa);
+                    circleData.setCircleStyle(circleStyle);
+
+                    //centerList.add(new dupCenter(sumLong,sumLati));
+                    // }
+                    //  }
                 }
+                //circleData.setRendered(true);
+
+                //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
             }
-
-            Log.i(LOG_TAG,"마지막 중심좌표! = " + sumLong + " , " + sumLati);
-
-        } catch (JSONException e){
-            e.printStackTrace();
         }
+
+        //Log.i(LOG_TAG,"마지막 중심좌표! = " + sumLong + " , " + sumLati);
+
+    } catch (JSONException e){
+        e.printStackTrace();
     }
+}
 
     /**
      * 지도가 초기화된 후 호출된다.
@@ -331,8 +351,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         if (errorInfo == null) { // success
             mMapController.setMapCenter(
                     new NGeoPoint(127.061, 37.51), 11);
-        Log.i(LOG_TAG, "inithandler : zoomlevel = "+mapview.getMapController().getZoomLevel());
-        isInit=true;
+            Log.i(LOG_TAG, "inithandler : zoomlevel = "+mapview.getMapController().getZoomLevel());
+            isInit=true;
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
                     + errorInfo.toString());
@@ -346,8 +366,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         count_hashtag = new HashMap<>();
         int total_text_num = 0;
         int total_sum = 0;
-        double total_percent;
         int popular_index = 0;
+        double percent;
+        double total_percent;
+
         popular_hash = new String[10];
 
         try {
@@ -365,7 +387,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
-                Log.e("superdroid", outPoint.toString());
+                //Log.e("superdroid", outPoint.toString());
 
                 if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
                     String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
@@ -441,15 +463,16 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     if(value >= hashtag_percent) {
                         Log.e("superdorid", "(15%)" + key + " : " + value);
 
+                        percent = ((double)value / (double)total_sum) * 100; //하나의 해쉬태그가 전체에서 차지하는 비율
+                        Log.i(LOG_TAG, "percent="+percent);
                         popular_hash[popular_index] = key;
                         popular_index++;
-                        //tagList.add(key);
-                        meanShift(initLong,initLati,radius, key);
+                        meanShift(initLong,initLati,radius, key, percent);
                     }
                 }
             }
 
-            Log.e("superdroid", "========================================hash============================================");
+            //Log.e("superdroid", "========================================hash============================================");
 
         } catch (JSONException e){
             e.printStackTrace();
@@ -820,7 +843,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     for(int j=0; j<=1800; j+=900) {
                         searchStartPixel.set(i,j);
                         searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                        getHashtag(searchStart.longitude, searchStart.latitude, 1200F);
+                        getHashtag(searchStart.longitude, searchStart.latitude, 1200F); //초기 줌레벨 11이기 때문
                     }
                 }
             }

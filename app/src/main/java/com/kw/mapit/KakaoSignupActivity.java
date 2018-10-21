@@ -18,7 +18,9 @@ import com.kakao.util.helper.log.Logger;
 
 public class KakaoSignupActivity extends Activity {
     String userName;
+    String userId;
     String userEmail;
+
 
     //savedInstanceState : 기존 세션 정보가 저장된 객체
     @Override
@@ -58,9 +60,11 @@ public class KakaoSignupActivity extends Activity {
             public void onSuccess(UserProfile userProfile) {
                 Log.e("superdroid","UserProfile : " + userProfile);
 
+
                 Log.e("test","로그인 성공!");
 
                 userName = userProfile.getNickname();
+                //userId = String.valueOf(userProfile.getId());
                 userEmail = userProfile.getEmail();
 
                 redirectInputDataActivity();
@@ -71,8 +75,9 @@ public class KakaoSignupActivity extends Activity {
     //InputDataActivity 이동
     private void redirectInputDataActivity() {
         Intent userProfileIntent = new Intent(this, InputDataActivity.class);
-        userProfileIntent.putExtra("NAME", userName);
-        userProfileIntent.putExtra("EMAIL", userEmail);
+        userProfileIntent.putExtra("USER_ID", userId);
+        userProfileIntent.putExtra("USER_NAME", userName);
+        userProfileIntent.putExtra("USER_EMAIL", userEmail);
         startActivity(userProfileIntent);
         finish();
     }

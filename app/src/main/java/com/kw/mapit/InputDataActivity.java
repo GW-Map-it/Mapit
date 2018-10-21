@@ -63,13 +63,24 @@ public class InputDataActivity extends AppCompatActivity {
         loginName.setText(userName);
         loginEmail.setText(userEmail);
 
-        //Intent로 사용자 아이디 불러오기
+        //Google 로그인으로 연결한 사용자 정보 받아오기
         Intent googleIntent = getIntent();
         if (googleIntent != null) {
             String name = googleIntent.getStringExtra("NAME");
             String id = googleIntent.getStringExtra("ID");
 
             //loginId.setText(id);
+            loginName.setText(name);
+        }
+
+        //Kakao 로그인으로 연결한 사용자 정보 받아오기
+        Intent kakaoIntent = getIntent();
+        if (kakaoIntent != null) {
+            String id = kakaoIntent.getStringExtra("KAKAO_ID");
+            String name = kakaoIntent.getStringExtra("KAKAO_NAME");
+            String email = kakaoIntent.getStringExtra("KAKAO_EMAIL");
+
+            loginEmail.setText(email);
             loginName.setText(name);
         }
     }

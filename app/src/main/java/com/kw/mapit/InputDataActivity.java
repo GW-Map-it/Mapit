@@ -32,12 +32,14 @@ public class InputDataActivity extends AppCompatActivity {
     TextView tv_signIn;
     EditText loginId;
     EditText loginPassword;
+    EditText loginName;
     EditText loginEmail;
     EditText loginAge;
     RadioGroup loginSex;
 
-    String userName;
+    String userId;
     String userPassword;
+    String userName;
     String userSex;
     int userAge;
     String userEmail;
@@ -53,11 +55,12 @@ public class InputDataActivity extends AppCompatActivity {
 
         loginId = (EditText) findViewById(R.id.ed_api_signin_id);
         loginPassword = (EditText) findViewById(R.id.ed_api_signin_password);
+        loginName = (EditText) findViewById(R.id.ed_api_signin_name);
         loginSex = (RadioGroup) findViewById(R.id.rg_sex);
         loginAge = (EditText) findViewById(R.id.ed_api_signin_age);
         loginEmail = (EditText) findViewById(R.id.ed_api_signin_email);
 
-        loginId.setText(userName);
+        loginName.setText(userName);
         loginEmail.setText(userEmail);
 
         //Intent로 사용자 아이디 불러오기
@@ -66,8 +69,8 @@ public class InputDataActivity extends AppCompatActivity {
             String name = googleIntent.getStringExtra("NAME");
             String id = googleIntent.getStringExtra("ID");
 
-            //loginId.setText(name);
-            loginId.setText(id);
+            //loginId.setText(id);
+            loginName.setText(name);
         }
     }
 
@@ -75,8 +78,9 @@ public class InputDataActivity extends AppCompatActivity {
         if(v.getId() == R.id.btn_sign_in)
         {
             //EditText에서 정보 받아오기
-            userName = loginId.getText().toString();
+            userId = loginId.getText().toString();
             userPassword = loginPassword.getText().toString();
+            userName = loginName.getText().toString();
             int radioId = loginSex.getCheckedRadioButtonId();
             RadioButton rb = (RadioButton)findViewById(radioId);
             if(rb.getText().toString().equals("Male"))
@@ -96,12 +100,13 @@ public class InputDataActivity extends AppCompatActivity {
             }
             userEmail = loginEmail.getText().toString();
 
-            Log.e("superdroid", userName + " - " + userPassword+ " - " + userSex+ " - " + userAge+ " - " + userEmail);
+            Log.e("superdroid", userId + " - " + userPassword+ " - " + userName + " - " + userSex+ " - " + userAge+ " - " + userEmail);
 
             //Insert 사용자 정보
             sbParams = new StringBuffer();
             sbParams.append("id=").append(userName);
             sbParams.append("&").append("password=").append(userPassword);
+            sbParams.append("&").append("name=").append(userName);
             sbParams.append("&").append("sex=").append(userSex);
             sbParams.append("&").append("age=").append(userAge);
             sbParams.append("&").append("email=").append(userEmail);
@@ -113,6 +118,7 @@ public class InputDataActivity extends AppCompatActivity {
             if(result.contains("success")) {
                 loginId.setText("");
                 loginPassword.setText("");
+                loginName.setText("");
                 rb.setSelected(false);
                 loginAge.setText("");
                 loginEmail.setText("");
@@ -125,7 +131,7 @@ public class InputDataActivity extends AppCompatActivity {
                 Activity activity = (Activity)LoginActivity.activity_login;
                 activity.finish();
 
-                Toast.makeText(getApplicationContext(), "Map it에 오신 것을 환영합니다:)", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Mapit에 오신 것을 환영합니다:)", Toast.LENGTH_LONG).show();
             }
             //DB에 사용자 정보 저장 실패 시
             else {

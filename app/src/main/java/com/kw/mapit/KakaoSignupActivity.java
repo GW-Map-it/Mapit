@@ -64,7 +64,7 @@ public class KakaoSignupActivity extends Activity {
                 Log.e("test","로그인 성공!");
 
                 userName = userProfile.getNickname();
-                userId = String.valueOf(userProfile.getId());
+                //userId = String.valueOf(userProfile.getId());
                 userEmail = userProfile.getEmail();
 
                 redirectInputDataActivity();
@@ -75,9 +75,9 @@ public class KakaoSignupActivity extends Activity {
     //InputDataActivity 이동
     private void redirectInputDataActivity() {
         Intent userProfileIntent = new Intent(this, InputDataActivity.class);
-        userProfileIntent.putExtra("KAKAO_ID", userId);
-        userProfileIntent.putExtra("KAKAO_NAME", userName);
-        userProfileIntent.putExtra("KAKAO_EMAIL", userEmail);
+        userProfileIntent.putExtra("USER_ID", userId);
+        userProfileIntent.putExtra("USER_NAME", userName);
+        userProfileIntent.putExtra("USER_EMAIL", userEmail);
         startActivity(userProfileIntent);
         finish();
     }

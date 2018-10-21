@@ -49,10 +49,6 @@ public class InputDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_data);
 
-        Intent getIntent = new Intent();
-        userName = getIntent.getStringExtra("USERNAME");
-        userEmail = getIntent.getStringExtra("USEREMAIL");
-
         loginId = (EditText) findViewById(R.id.ed_api_signin_id);
         loginPassword = (EditText) findViewById(R.id.ed_api_signin_password);
         loginName = (EditText) findViewById(R.id.ed_api_signin_name);
@@ -63,26 +59,20 @@ public class InputDataActivity extends AppCompatActivity {
         loginName.setText(userName);
         loginEmail.setText(userEmail);
 
-        //Google 로그인으로 연결한 사용자 정보 받아오기
-        Intent googleIntent = getIntent();
-        if (googleIntent != null) {
-            String name = googleIntent.getStringExtra("NAME");
-            String id = googleIntent.getStringExtra("ID");
+        //Google/Kakao 로그인으로 연결한 사용자 정보 받아오기
+        Intent getIntent = getIntent();
+        if (getIntent != null) {
+            String id = getIntent.getStringExtra("USER_ID");
+            String name = getIntent.getStringExtra("USER_NAME");
+            String email = getIntent.getStringExtra("USER_EMAIL");
 
-            //loginId.setText(id);
-            loginName.setText(name);
-        }
-
-        //Kakao 로그인으로 연결한 사용자 정보 받아오기
-        Intent kakaoIntent = getIntent();
-        if (kakaoIntent != null) {
-            String id = kakaoIntent.getStringExtra("KAKAO_ID");
-            String name = kakaoIntent.getStringExtra("KAKAO_NAME");
-            String email = kakaoIntent.getStringExtra("KAKAO_EMAIL");
-
+            loginId.setText(id);
             loginEmail.setText(email);
             loginName.setText(name);
+
+            Log.e("KakaoLogin", "ID : " + id + " / Name : " + name + " / Email : " + email);
         }
+
     }
 
     public void onClick(View v) throws ExecutionException, InterruptedException {

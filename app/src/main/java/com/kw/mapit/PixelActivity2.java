@@ -53,6 +53,9 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     String longitude;
     String latitude;
 
+    private int index = 0;
+    private double[] longArr = new double[9];
+    private double[] latiArr = new double[9];
     private double exLong;
     private double exLati;
 
@@ -81,7 +84,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pixel);
+        setContentView(R.layout.activity_pixel2);
 
         String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
         getData(serverURL);
@@ -199,7 +202,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
                 Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
-                if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700)
+                //if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700)
                 {
                     // set path data points
                     NMapPathData pathData = new NMapPathData(1);
@@ -226,38 +229,23 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
     }
 
+    /**
+     * 원의 중심, 원의 반지름, 점의 위치(알고 있음)
+     * 중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
+     * 작으면 안에 포함되어 있는 점이라고 생각
+     * */
     protected void meanShift(double initLong, double initLati, float radius) {
-        //원의 중심, 원의 반지름, 점의 위치(알고 있음)
-        //중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
-        //작으면 안에 포함되어 있는 점이라고 생각
-
-        /*원 그릴 때 사용할 path data*/
-        //NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
-
         //종결 조건
-        if((initLong - exLong < 0.001 || exLong - initLong < 0.001) && (initLati - exLati < 0.001 || exLati - initLati < 0.001))
+        if((initLong - exLong < 0.0000001 || exLong - initLong < 0.0000001) && (initLati - exLati < 0.0000001 || exLati - initLati < 0.0000001))
         {
-            NMapCircleData circleData = new NMapCircleData(1);
-
-            circleData.initCircleData();
-            circleData.addCirclePoint(initLong, initLati, radius); //중심, 반지름 //원생성!!!
-            circleData.endCircleData();
-
-            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-
-            Random rand = new Random();
-            int myRandomNumber = rand.nextInt(0xffffff);
-
-            Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-            System.out.printf("%x\n",myRandomNumber);
-            circleStyle.setFillColor(myRandomNumber,0x22);
-            circleStyle.setStrokeColor(myRandomNumber,0xaa);
-            circleData.setCircleStyle(circleStyle);
-
-            NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
-            pathDataOverlay.addCircleData(circleData);
-
-            Log.e(LOG_TAG, "meanShift Fin - if");
+            //원의 중심을 배열에 추가
+            if(index < 9)
+            {
+                longArr[index] = initLong;
+                latiArr[index] = initLati;
+                Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "]" + latiArr[index]);
+                index++;
+            }
             return;
         }
 
@@ -301,6 +289,60 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * 9번 meanShift해 찾은 9개의 중심 중 비슷한 위치의 원들을 하나로 통일해 그리는 함수
+     * (다 그린 후에는 원의 중심을 저장하는 배열의 index를 0으로 초기화)
+     */
+    protected void unifyCircles()
+    {
+        Log.i(LOG_TAG, "unifyCircles called");
+        double[] distance = new double[8];
+
+        drawCircle(longArr[4], latiArr[4], 1000f);
+
+        //중심이 비슷한 위치에 있음을 판단
+        for(int i = 0; i < 8; i++) {
+            NGeoPoint circleCenter1 = new NGeoPoint(longArr[i], latiArr[i]);
+            NGeoPoint circleCenter2 = new NGeoPoint(longArr[i + 1], latiArr[i + 1]);
+            distance[i] = NGeoPoint.getDistance(circleCenter1, circleCenter2);
+            float dist = mMapView.getMapProjection().metersToPixels(circleCenter2, (float)distance[i]);
+            Log.i(LOG_TAG, "Distance = " + dist);
+
+            //비슷한 위치의 원 중 하나의 원만 화면에 출력
+            if (dist > 2000)
+            {
+                drawCircle(longArr[i], latiArr[i], 1000f);
+            }
+        }
+
+        //index 초기화
+        index = 0;
+    }
+
+    protected void drawCircle(double longitude, double latitude, float radius)
+    {
+        NMapCircleData circleData = new NMapCircleData(1);
+
+        circleData.initCircleData();
+        circleData.addCirclePoint(longitude, latitude, radius); //중심, 반지름 //원생성!!!
+        circleData.endCircleData();
+
+        NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+
+        //random circle color
+        Random rand = new Random();
+        int myRandomNumber = rand.nextInt(0xffffff);
+
+        //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+        System.out.printf("%x\n", myRandomNumber);
+        circleStyle.setFillColor(myRandomNumber, 0x22);
+        circleStyle.setStrokeColor(myRandomNumber, 0xaa);
+        circleData.setCircleStyle(circleStyle);
+
+        NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
+        pathDataOverlay.addCircleData(circleData);
     }
 
     /**
@@ -521,6 +563,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             item.setTitle(null);
         }
     };
+
     public void getData(String url) {
         class getDataJSON extends AsyncTask<String, Integer, String> {
             @Override
@@ -560,6 +603,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                         meanShift(searchStart.longitude, searchStart.latitude, 1000f);
                     }
                 }
+                unifyCircles();
 
                 long endTime = System.currentTimeMillis();
                 long Total = endTime - startTime;

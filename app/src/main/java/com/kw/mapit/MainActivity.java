@@ -36,9 +36,6 @@ public class MainActivity extends Activity {
         else if(v.getId() == R.id.get_hashtag) {
             goIntent = new Intent(this, PopularHashTagActivity.class);
         }
-        else if(v.getId() == R.id.mean_shift) {
-            goIntent = new Intent(this, MeanShiftActivity.class);
-        }
         else if(v.getId() == R.id.gps) {
             goIntent = new Intent(this, GPSActivity.class);
         }

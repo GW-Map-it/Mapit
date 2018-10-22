@@ -6,100 +6,120 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#393941"
+    android:gravity="center|top"
     tools:context=".InputDataActivity">
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/img_mapit2" />
+        android:layout_height="60dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/img_mapit2"
+        android:scaleType="fitCenter"/>
 
-    <TextView
-        android:id="@+id/tv_signIn"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="20dp"
-        android:textColor="#FFFFFF"
-        android:text="회원가입"/>
+        android:orientation="vertical">
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="20dp">
-
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="15dp">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="ID : "/>
+                android:text=" ID"/>
 
             <EditText
                 android:id="@+id/ed_api_signin_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"/>
-        </TableRow>
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/img_edittext"
+                android:scaleType="fitCenter"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
+        </LinearLayout>
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="Password : "/>
+                android:text=" Password"/>
 
             <EditText
                 android:id="@+id/ed_api_signin_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"/>
-        </TableRow>
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/img_edittext"
+                android:scaleType="fitCenter"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
+        </LinearLayout>
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="Name : "/>
+                android:text=" Name"/>
 
             <EditText
                 android:id="@+id/ed_api_signin_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"/>
-        </TableRow>
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/img_edittext"
+                android:scaleType="fitCenter"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
+        </LinearLayout>
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="Sex : "/>
+                android:text=" Male / Female"/>
 
             <RadioGroup
                 android:id="@+id/rg_sex"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_gravity="right"
+                android:gravity="right">
 
                 <RadioButton
                     android:id="@+id/rb_male"
@@ -117,55 +137,97 @@
 
             </RadioGroup>
 
-        </TableRow>
+        </LinearLayout>
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="Age : "/>
+                android:text=" Age"/>
 
             <EditText
                 android:id="@+id/ed_api_signin_age"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"/>
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/img_edittext"
+                android:scaleType="fitCenter"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
 
-        </TableRow>
+        </LinearLayout>
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:textColor="#FFFFFF"
-                android:text="E-mail : "/>
+                android:text=" E-mail"/>
 
             <EditText
                 android:id="@+id/ed_api_signin_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"/>
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/img_edittext"
+                android:scaleType="fitCenter"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
 
-        </TableRow>
-    </TableLayout>
+        </LinearLayout>
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_sign_in"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_gravity="center"
-        android:text="Sign In"
-        android:onClick="onClick"/>
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="60dp">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:background="@drawable/img_back_button"
+            android:scaleType="fitCenter"
+            android:text="BACK"
+            android:textColor="#000000"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/btn_sign_in"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:background="@drawable/img_signin_button"
+            android:scaleType="fitCenter"
+            android:text="SIGN IN"
+            android:textColor="#FFFFFF"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            android:onClick="onClick"/>
+
+    </LinearLayout>
 
 
 </LinearLayout>

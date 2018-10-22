@@ -76,7 +76,15 @@ public class InputDataActivity extends AppCompatActivity {
     }
 
     public void onClick(View v) throws ExecutionException, InterruptedException {
-        if(v.getId() == R.id.btn_sign_in)
+        //Back 버튼 클릭
+        if(v.getId() == R.id.btn_back)
+        {
+            finish();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+        //Sign in 버튼 클릭
+        else if(v.getId() == R.id.btn_sign_in)
         {
             //EditText에서 정보 받아오기
             userId = loginId.getText().toString();

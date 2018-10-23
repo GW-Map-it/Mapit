@@ -69,6 +69,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     HashMap<String, Integer> count_hashtag;
     String[] popular_hash;
+    int myRandomNumber;
 
     boolean isInit=false;
 
@@ -97,7 +98,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
 
-        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation_50.php";
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
         getData(serverURL);
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
@@ -310,9 +311,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             pathDataOverlay.addCircleData(circleData);
 
                             NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                            //랜덤 색깔
-                            Random rand = new Random();
-                            int myRandomNumber = rand.nextInt(0xffffff);
 
                             //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
                             //System.out.printf("%x\n",myRandomNumber);
@@ -511,7 +509,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 sum += value;
 
                 if(sum <= total_percent) {
-                    //해당 hashtag가 전체 개수의 15%이상이면
+                    //랜덤 색깔(Hashtag별로)
+                    Random rand = new Random();
+                    myRandomNumber = rand.nextInt(0xffffff);
+
+                    //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
                     if(value >= hashtag_percent) {
                         Point searchStartPixel = new Point(0,0);
                         NGeoPoint searchStart = null;
@@ -521,6 +523,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         Log.e("superdorid", "(15%)" + key + " : " + value + "개, " + percent + "%");
                         Log.i(LOG_TAG, "percent="+percent);
 
+                        //Hash Popular로 넘기는 String 배열
                         popular_hash[popular_index] = key;
                         popular_index++;
 

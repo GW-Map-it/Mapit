@@ -1,15 +1,15 @@
 package com.kw.mapit;
 
-public class dupCenter {
+public class DupCenter {
     double longitude;
     double latitude;
 
-    public dupCenter(){
+    public DupCenter(){
 
     }
-    public dupCenter(double longi, double lati) {
-        longitude=longi;
-        latitude=lati;
+    public DupCenter(double longi, double lati) {
+        longitude = longi;
+        latitude = lati;
     }
     public double getLong(){
         return longitude;

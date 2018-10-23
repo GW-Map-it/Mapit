@@ -44,13 +44,6 @@
         android:onClick="myClick"/>
 
     <Button
-        android:id="@+id/mean_shift"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:text="Mean Shift"
-        android:onClick="myClick"/>
-
-    <Button
         android:id="@+id/gps"
         android:layout_width="250dp"
         android:layout_height="wrap_content"

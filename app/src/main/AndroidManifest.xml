@@ -28,8 +28,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity" />
-        <activity android:name=".GoogleLoginActivity" />
-        <activity android:name=".GoogleLogin2Activity" />
         <activity android:name=".KakaoSignupActivity" />
         <activity android:name=".DbConnectActivity" />
         <activity
@@ -40,14 +38,13 @@
         <activity android:name=".InputDataActivity" />
         <activity android:name=".PopularHashTagActivity" />
         <activity android:name=".GPSActivity" />
+        <activity android:name=".HashPopularActivity"></activity>
 
         <!-- Kakao Login -->
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
 
-        <activity android:name=".MeanShiftActivity" />
-        <activity android:name=".HashPopularActivity"></activity>
     </application>
 
 </manifest>

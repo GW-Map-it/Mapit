@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
+    android:gravity="center_vertical|center"
     android:background="#393941"
     tools:context=".LoginActivity">
 
@@ -14,6 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:paddingTop="80dp"
         android:src="@drawable/img_mapit" />
 
 
@@ -26,7 +27,7 @@
 
         <EditText
             android:id="@+id/ed_login_id"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:background="@drawable/edit_round"
@@ -35,22 +36,22 @@
             android:hint="Enter your ID"
             android:paddingLeft="5dp"
             android:layout_marginBottom="10dp"
-            android:textSize="20dp"
+            android:textSize="22dp"
             android:textColor="#FFFFFF" />
 
 
         <EditText
             android:id="@+id/ed_login_password"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:background="@drawable/edit_round"
             android:drawableLeft="@drawable/icon_password"
             android:drawablePadding="10dp"
-            android:hint="Enter your Password"
+            android:hint="Enter your PW"
             android:inputType="textPassword"
             android:paddingLeft="5dp"
-            android:textSize="20dp"
+            android:textSize="22dp"
             android:textColor="#FFFFFF" />
 
 
@@ -60,60 +61,82 @@
         android:id="@+id/btn_login"
         android:layout_width="wrap_content"
         android:layout_height="26dp"
-        android:layout_marginBottom="50dp"
         android:background="@drawable/button_round"
         android:text="로그인"
         android:onClick="onClick"/>
 
-    <ImageButton
-        android:id="@+id/btn_google_sign_in"
-        android:layout_width="270dp"
-        android:layout_height="40dp"
-        android:src="@drawable/image_google_signin"
-        android:background="@android:color/transparent"
-        android:adjustViewBounds="true"
-        android:layout_marginBottom="10dp"
-        android:scaleType="centerCrop"
-        android:onClick="onClick"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="50dp"
+        android:gravity="bottom|center_horizontal">
 
-    <FrameLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_gravity="center">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_gravity="center">
 
-        <com.kakao.usermgmt.LoginButton
-            android:id="@+id/btn_kakao_sign_in"
-            android:layout_width="200dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:onClick="onClick" />
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/btn_google_sign_in"
+                android:layout_width="260dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:onClick="onClick"/>
 
-        <ImageView
-            android:id="@+id/iv_kakao_sign_in"
+
+            <ImageView
+                android:id="@+id/iv_google_sign_in"
+                android:layout_width="270dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/image_google_signin" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_gravity="center">
+
+            <com.kakao.usermgmt.LoginButton
+                android:id="@+id/btn_kakao_sign_in"
+                android:layout_width="200dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:onClick="onClick" />
+
+            <ImageView
+                android:id="@+id/iv_kakao_sign_in"
+                android:layout_width="270dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:onClick="onClick"
+                android:scaleType="fitCenter"
+                android:src="@drawable/image_kakao_signin" />
+
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/btn_sign_in"
             android:layout_width="270dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:src="@drawable/image_kakao_signin"
-            android:background="@android:color/transparent"
+            android:layout_height="50dp"
             android:adjustViewBounds="true"
-            android:layout_marginBottom="10dp"
-            android:scaleType="centerCrop"
-            android:onClick="onClick"/>
+            android:background="@android:color/transparent"
+            android:onClick="onClick"
+            android:scaleType="fitCenter"
+            android:src="@drawable/image_signin" />
 
-    </FrameLayout>
-
-    <ImageButton
-        android:id="@+id/btn_sign_in"
-        android:layout_width="270dp"
-        android:layout_height="40dp"
-        android:src="@drawable/image_signin"
-        android:background="@android:color/transparent"
-        android:adjustViewBounds="true"
-        android:layout_marginBottom="10dp"
-        android:scaleType="centerCrop"
-        android:onClick="onClick"/>
+    </LinearLayout>
 
 
 </LinearLayout>

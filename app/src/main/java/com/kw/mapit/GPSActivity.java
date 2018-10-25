@@ -3,9 +3,11 @@ package com.kw.mapit;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -13,150 +15,200 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.nhn.android.maps.NMapActivity;
+import com.nhn.android.maps.NMapCompassManager;
+import com.nhn.android.maps.NMapController;
+import com.nhn.android.maps.NMapLocationManager;
+import com.nhn.android.maps.NMapOverlay;
+import com.nhn.android.maps.NMapOverlayItem;
+import com.nhn.android.maps.NMapView;
+import com.nhn.android.maps.maplib.NGeoPoint;
+import com.nhn.android.maps.nmapmodel.NMapError;
+import com.nhn.android.maps.nmapmodel.NMapPlacemark;
+import com.nhn.android.mapviewer.overlay.NMapCalloutOverlay;
+import com.nhn.android.mapviewer.overlay.NMapMyLocationOverlay;
+import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 
-public class GPSActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    final int PERISSIONS_ACCESS_LOCATION = 0;
+public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChangeListener, NMapOverlayManager.OnCalloutOverlayListener {
+    // API-KEY
+    public static final String API_KEY = "29AIQje_U7muB8tVyofe";
+    // 네이버 맵 객체
+    NMapView mMapView = null;
+    // 맵 컨트롤러
+    NMapController mMapController = null;
+    // 맵을 추가할 레이아웃
+    LinearLayout MapContainer;
+    // 오버레이의 리소스를 제공하기 위한 객체
+//	NMapViewerResourceProvider mMapViewerResourceProvider = null;
+    // 오버레이 관리자
+    private NMapMyLocationOverlay mMyLocationOverlay;
+    private NMapLocationManager mMapLocationManager;
+    private NMapCompassManager mMapCompassManager;
 
-    GoogleApiClient mGoogleApiClient;
-    LocationManager locationManager;
-
-    // 업데이트 거리 및 시간
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10m
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1분
-
-    TextView tv_latitude;
-    TextView tv_longitude;
-
-    double latitude;            //위도
-    double longitude;           //경도
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps);
 
-        //Permission 없으면 요청
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},PERISSIONS_ACCESS_LOCATION);
-        }
+        // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
+        MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
 
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-            Log.e("GPSActivity", "00000000000000000000000000000");
-        }
+        // 네이버 지도 객체 생성
+        mMapView = new NMapView(this);
+
+        // 지도 객체로부터 컨트롤러 추출
+        mMapController = mMapView.getMapController();
+
+        // 네이버 지도 객체에 APIKEY 지정
+        mMapView.setApiKey(API_KEY);
+
+        // 생성된 네이버 지도 객체를 LinearLayout에 추가시킨다.
+        MapContainer.addView(mMapView);
+
+        // 지도를 터치할 수 있도록 옵션 활성화
+        mMapView.setClickable(true);
+        // 확대/축소를 위한 줌 컨트롤러 표시 옵션 활성화
+        mMapView.setBuiltInZoomControls(true, null);
+        super.setMapDataProviderListener(onDataProviderListener);
+
+        // 지도에 대한 상태 변경 이벤트 연결
+        mMapView.setOnMapStateChangeListener(this);
+
+        // location manager
+        mMapLocationManager = new NMapLocationManager(this);
+        mMapLocationManager.setOnLocationChangeListener(onMyLocationChangeListener);
+
+        // compass manager
+        mMapCompassManager = new NMapCompassManager(this);
 
     }
 
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
-
-    //Permission 요청 결과
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERISSIONS_ACCESS_LOCATION: {
-                //Permission 획득 성공
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(getApplicationContext(), "Allow Mapit to access your location!", Toast.LENGTH_SHORT).show();
-                }
-                //Permission 획득 실패 >> MainActivity로 이동
-                else {
-                    Toast.makeText(getApplicationContext(), "Location permissions are required.", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                }
+    public void onMapInitHandler(NMapView nMapView, NMapError nMapError) {
+        if (nMapError == null) { // success
+            startMyLocation();//현재위치로 이동
+            // mMapController.setMapCenter(new NGeoPoint(126.978371,
+            // 37.5666091),
+            // 11);
+        } else { // fail
+            android.util.Log.e("NMAP", "onMapInitHandler: error=" + nMapError.toString());
+        }
+
+    }
+
+    private void startMyLocation() {
+        mMapLocationManager = new NMapLocationManager(this);
+        mMapLocationManager.setOnLocationChangeListener(onMyLocationChangeListener);
+
+        boolean isMyLocationEnabled = mMapLocationManager.enableMyLocation(true);
+        if (!isMyLocationEnabled) {
+            Toast.makeText(this, "Please enable a My Location source in system settings", Toast.LENGTH_LONG).show();
+
+            Intent goToSettings = new Intent(
+                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(goToSettings);
+            finish();
+
+        } else {
+
+        }
+    }
+
+    private void stopMyLocation() {
+        if (mMyLocationOverlay != null) {
+            mMapLocationManager.disableMyLocation();
+
+            if (mMapView.isAutoRotateEnabled()) {
+                mMyLocationOverlay.setCompassHeadingVisible(false);
+                mMapCompassManager.disableCompass();
+                mMapView.setAutoRotateEnabled(false, false);
+                MapContainer.requestLayout();
+            }
+        }
+    }
+
+    private final NMapActivity.OnDataProviderListener onDataProviderListener = new NMapActivity.OnDataProviderListener() {
+
+        @Override
+        public void onReverseGeocoderResponse(NMapPlacemark placeMark, NMapError errInfo) {
+
+            if (errInfo != null) {
+                Log.e("myLog", "Failed to findPlacemarkAtLocation: error=" + errInfo.toString());
+                Toast.makeText(getApplicationContext(), errInfo.toString(), Toast.LENGTH_LONG).show();
+
                 return;
+
+            }else{
+                Toast.makeText(getApplicationContext(), placeMark.toString(), Toast.LENGTH_LONG).show();
             }
         }
-    }
+    };
 
-    //위치 변경 시
-    @Override
-    public void onLocationChanged(Location location) {
-        if(location != null){
-            latitude= location.getLatitude();
-            longitude = location.getLongitude();
 
-            tv_latitude.setText(String.valueOf(latitude));
-            tv_longitude.setText(String.valueOf(longitude));
-            Log.e("GPSActivity", "Latitude : " + latitude + " / Longitude : " + longitude);
+
+    private final NMapLocationManager.OnLocationChangeListener onMyLocationChangeListener = new NMapLocationManager.OnLocationChangeListener() {
+        @Override
+        public boolean onLocationChanged(NMapLocationManager locationManager, NGeoPoint myLocation) {
+//			if (mMapController != null) {
+//				mMapController.animateTo(myLocation);
+//			}
+            //현재 위치로 지도 이동
+            Log.e("myLog", "===========================myLocation  lat " + myLocation.getLatitude());
+            Log.e("myLog", "=====================================myLocation  lng " + myLocation.getLongitude());
+            mMapController.setMapCenter(
+                    new NGeoPoint(myLocation.getLongitude(), myLocation.getLatitude()), mMapController.getZoomLevel());
+
+            //findPlacemarkAtLocation(myLocation.getLongitude(), myLocation.getLatitude());
+            //위도경도를 주소로 변환
+
+            return true;
         }
-    }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.e("GPSActivity", "??????????????????????????");
-
-        //Permission 확인
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-
-            Log.e("GPSActivity", "=========================");
-
-            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
-
-            //Location 받아오기
-            Location mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-            if (mLocation != null) {
-                latitude= mLocation.getLatitude();
-                longitude = mLocation.getLongitude();
-
-                Log.e("GPSActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1111");
-
-                tv_latitude.setText(String.valueOf(latitude));
-                tv_longitude.setText(String.valueOf(longitude));
-                Log.e("GPSActivity", "Latitude : " + latitude + " / Longitude : " + longitude);
-            }
+        @Override
+        public void onLocationUpdateTimeout(NMapLocationManager nMapLocationManager) {
+            Toast.makeText(getApplicationContext(), "Your current location is temporarily unavailable.", Toast.LENGTH_LONG).show();
 
         }
 
+        @Override
+        public void onLocationUnavailableArea(NMapLocationManager nMapLocationManager, NGeoPoint nGeoPoint) {
+            Toast.makeText(getApplicationContext(), "Your current location is unavailable area.", Toast.LENGTH_LONG).show();
+
+            stopMyLocation();
+        }
+    };
+
+
+        @Override
+    public void onMapCenterChange(NMapView nMapView, NGeoPoint nGeoPoint) {
+
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onMapCenterChangeFine(NMapView nMapView) {
 
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e("GPSActivity", "????????????????????///" + connectionResult.toString());
+    public void onZoomLevelChange(NMapView nMapView, int i) {
+
+    }
+
+    @Override
+    public void onAnimationStateChange(NMapView nMapView, int i, int i1) {
+
+    }
+
+    @Override
+    public NMapCalloutOverlay onCreateCalloutOverlay(NMapOverlay nMapOverlay, NMapOverlayItem nMapOverlayItem, Rect rect) {
+        return null;
     }
 }

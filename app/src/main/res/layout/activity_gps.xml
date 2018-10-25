@@ -7,42 +7,13 @@
     android:orientation="vertical"
     tools:context=".GPSActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="=========현재 나의 위치========="/>
-
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Latitude : "/>
-
-        <TextView
-            android:id="@+id/tv_latitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Latitude : "/>
-
-        <TextView
-            android:id="@+id/tv_longitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:id="@+id/MapContainer"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true">
 
     </LinearLayout>
 

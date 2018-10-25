@@ -1,13 +1,17 @@
 ﻿package com.kw.mapit;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhn.android.maps.NMapActivity;
@@ -358,25 +362,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     + errorInfo.toString());
         }
     }
-void makeIndex(String a[]){
-
-            LayoutInflater inflater =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = inflater.inflate(R.layout.activity_pixel,null);
-            ScrollView sv =(ScrollView)v.findViewById(R.id.ScrollView1);
-            LinearLayout ll = new LinearLayout(this);
-            ll.setOrientation(LinearLayout.VERTICAL);
-            String array[] = new String[10];
-            for(int i=0;i<array.length;i++){
-                array[i]=a[i];
-                TextView tv = new TextView(this);
-                tv.setText(a[i]);
-                tv.setBackgroundColor(0x1b207);
-                ll.addView(tv);
-                sv.addView(ll)    ;
-            }
-            setContentView(v);
-        }
-
 
     //인기 해시태그 Pick
     protected void getHashtag(double initLong, double initLati, float radius) {
@@ -487,7 +472,6 @@ void makeIndex(String a[]){
                         popular_hash[popular_index] = key;
                         popular_index++;
                         meanShift(initLong,initLati,radius, key, percent);
-	           makeIndex(popular_hash);
                     }
                 }
             }

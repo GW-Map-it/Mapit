@@ -38,8 +38,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,6 +72,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     HashMap<String, Integer> count_hashtag;
     String[] popular_hash;
+    int[] num_popular_hash;
     int myRandomNumber;
 
     boolean isInit=false;
@@ -185,9 +189,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             Intent intent = new Intent(this, DbConnectActivity.class);
             startActivity(intent);
         }
-        else if(v.getId() == R.id.btn_nextActivity) {
-            Intent intent = new Intent(this, HashPopularActivity.class);
+        else if(v.getId() == R.id.btn_viewHashtag) {
+            Intent intent = new Intent(this, MenuPopup.class);
             intent.putExtra("POPULAR_HASHTAG", popular_hash);
+            intent.putExtra("NUM_POPULAR_HASHTAG", num_popular_hash);
             startActivity(intent);
         }
     }
@@ -420,6 +425,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         double total_percent;
 
         popular_hash = new String[10];
+        num_popular_hash = new int[10];
 
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
@@ -525,6 +531,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                         //Hash Popular로 넘기는 String 배열
                         popular_hash[popular_index] = key;
+                        num_popular_hash[popular_index] = value;
                         popular_index++;
 
                         for(int i=0; i<=1100; i+=1100) {

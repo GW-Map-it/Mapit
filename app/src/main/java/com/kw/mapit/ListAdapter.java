@@ -12,17 +12,20 @@ public class ListAdapter extends BaseAdapter {
     Context mContext;
     LayoutInflater inflater = null;
     String[] mHash;
+    int[] mNum;
 
+    TextView tv_number;
     TextView tv_hash;
     TextView tv_num;
     int count_num = 1;
 
     private int nListCount = 0;
 
-    public ListAdapter(Context context, String[] hashmap)
+    public ListAdapter(Context context, String[] hashmap, int[] num)
     {
         this.mContext = context;
         this.mHash = hashmap;
+        this.mNum = num;
 
         //String 배열 크기
         for(int i=0;i<hashmap.length;i++) {
@@ -60,12 +63,14 @@ public class ListAdapter extends BaseAdapter {
 
         convertView.setTag(position);
 
-        tv_num = (TextView)convertView.findViewById(R.id.tv_num);
+        tv_number = (TextView)convertView.findViewById(R.id.tv_number);
         tv_hash = (TextView)convertView.findViewById(R.id.tv_hash);
+        tv_num = (TextView)convertView.findViewById(R.id.tv_num);
 
         //인기 Hashtag 출력
-        tv_num.setText(position+1 + ". ");
+        tv_number.setText(position+1 + ". ");
         tv_hash.setText(mHash[position]);
+        tv_num.setText(mNum[position] + "개");
 
         return convertView;
     }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#393941"
+    android:padding="20dp"
+    tools:context=".MenuPopup">
+
+    <TextView
+        android:id="@+id/tv_popularHashtag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:text="Popular Hastag"
+        android:onClick="onClick"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:text="==================="
+        android:onClick="onClick"/>
+
+    <TextView
+        android:id="@+id/tv_recentHashtag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:text="Recent Hastag"
+        android:onClick="onClick"/>
+
+</LinearLayout>

@@ -2,19 +2,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:id="@+id/map"
-    android:orientation="horizontal"
     tools:context=".PixelActivity">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:id="@+id/MapContainer"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     </LinearLayout>
 <ScrollView
@@ -26,27 +23,27 @@
         android:layout_height="fill_parent">
     </ScrollView>
     <ImageButton
-        android:id="@+id/btn_nextActivity"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:id="@+id/btn_viewHashtag"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="top|right"
-        android:paddingTop="20dp"
-        android:paddingRight="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
-        android:src="@drawable/img_next_activity"
+        android:src="@drawable/img_btn_hashtag"
         android:onClick="onClick"/>
 
     <ImageButton
         android:id="@+id/btn_addText"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_gravity="bottom|right"
-        android:paddingBottom="20dp"
-        android:paddingRight="20dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="top|right"
+        android:layout_marginTop="80dp"
+        android:layout_marginRight="20dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
-        android:src="@drawable/img_addtext"
+        android:src="@drawable/img_btn_addtext"
         android:onClick="onClick"/>
 
 </FrameLayout>

@@ -38,13 +38,17 @@
         <activity android:name=".InputDataActivity" />
         <activity android:name=".PopularHashTagActivity" />
         <activity android:name=".GPSActivity" />
-        <activity android:name=".HashPopularActivity"></activity>
+        <activity android:name=".HashPopularActivity" />
+        <activity
+            android:name=".MenuPopup"
+            android:theme="@style/Theme.AppCompat.Dialog" />
 
         <!-- Kakao Login -->
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
 
+        <activity android:name=".HashRecentActivity"></activity>
     </application>
 
 </manifest>

@@ -18,7 +18,7 @@
         android:padding="30dp">
 
         <TextView
-            android:id="@+id/tv_num"
+            android:id="@+id/tv_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -34,6 +34,16 @@
             android:textColor="#FFFFFF"/>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_gravity="bottom|right"
+        android:textSize="15dp"
+        android:textColor="#FFFFFF"/>
 
 
     <ImageView

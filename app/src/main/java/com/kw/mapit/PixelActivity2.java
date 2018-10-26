@@ -41,6 +41,8 @@ import java.net.URL;
 import java.lang.Math;
 import java.util.Random;
 
+import static java.lang.Math.abs;
+
 public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateChangeListener {
     String myJSON;
 
@@ -186,6 +188,20 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
     }
 
+    protected void parseJson()
+    {
+        try {
+            jsonObj = new JSONObject(myJSON);
+            location = jsonObj.getJSONArray(TAG_RESULTS);
+
+            for(int i=0; i<location.length(); i++) {
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected void matchData(){ //데이터를 점에 매칭
         try {
             jsonObj = new JSONObject(myJSON);
@@ -200,8 +216,9 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 Point outPoint = null;
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
-                Log.i(LOG_TAG, "pixel coor= "+outPoint);
+                //Log.i(LOG_TAG, "pixel coor= "+outPoint);
 
+                //if문 사용하면 첫 화면 안에 보이는 데이터만 점으로 출력
                 //if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700)
                 {
                     // set path data points
@@ -236,14 +253,15 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      * */
     protected void meanShift(double initLong, double initLati, float radius) {
         //종결 조건
-        if((initLong - exLong < 0.0000001 || exLong - initLong < 0.0000001) && (initLati - exLati < 0.0000001 || exLati - initLati < 0.0000001))
+        if(abs(initLong - exLong) < 0.0000001 && abs(initLati - exLati) < 0.0000001)
         {
+            Log.i(LOG_TAG, "initLong = " + initLong + ", exLong = " + exLong + ", initLati = " + initLati + ", exLong = " + exLong);
             //원의 중심을 배열에 추가
             if(index < 9)
             {
                 longArr[index] = initLong;
                 latiArr[index] = initLati;
-                Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "]" + latiArr[index]);
+                Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "] = " + latiArr[index]);
                 index++;
             }
             return;
@@ -257,8 +275,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             NGeoPoint circleCenter = new NGeoPoint((initLong),(initLati));
             Point outPoint = null;
 
-            //JSONObject jsonObj = new JSONObject(myJSON);
-            //location = jsonObj.getJSONArray(TAG_RESULTS);
+            jsonObj = new JSONObject(myJSON);
+            location = jsonObj.getJSONArray(TAG_RESULTS);
 
             for (int i = 0; i < location.length(); i++) {   //모든 데이터
                 JSONObject c = location.getJSONObject(i);
@@ -268,11 +286,12 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
                 NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 outPoint = mMapView.getMapProjection().toPixels(point,outPoint);
-                Log.i(LOG_TAG, "pixel coor= "+outPoint);
+                //Log.i(LOG_TAG, "pixel coor= " + outPoint);
 
-                if(outPoint.x <= 1100 && outPoint.x >= 0 && outPoint.y >= 0 && outPoint.y <= 1800) {          //화면 안에 보이는 경우
+                if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700)  //화면 안에 보이는 경우
+                {
                     dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
-                    Log.i(LOG_TAG,"dataDis = "+dataDis);
+                    //Log.i(LOG_TAG,"dataDis = "+dataDis);
 
                     if(dataDis < radius) { //원 안에 있으면
                         count++;
@@ -280,12 +299,12 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                         sumLati += Double.parseDouble(latitude);
                     }
                 }
-
                 exLong = initLong;
                 exLati = initLati;
-                meanShift(sumLong/count, sumLati/count, radius);
             }
-        } catch (JSONException e){
+            meanShift(sumLong/count, sumLati/count, radius);
+        }
+        catch (JSONException e){
             e.printStackTrace();
         }
 
@@ -311,7 +330,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             Log.i(LOG_TAG, "Distance = " + dist);
 
             //비슷한 위치의 원 중 하나의 원만 화면에 출력
-            if (dist > 2000)
+            if (dist > 20)    // meanShift가 제대로 돌아가면 한 20으로 줄여야 될듯.
             {
                 drawCircle(longArr[i], latiArr[i], 1000f);
             }
@@ -393,25 +412,25 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center)
     {
-        /**
-        if(isInit)
-        {
-            Log.e(LOG_TAG, "onCenterChange called");
-        }
         if(isInit){
+            Log.e(LOG_TAG, "onCenterChange called");
             int level = mMapController.getZoomLevel();
-            mapview.getOverlays().clear();
+            //mapview.getOverlays().clear();
 
             NGeoPoint searchStart;
-            matchData();
 
             for(int i=0; i<=1100; i+=550) {
                 for(int j=0; j<=1800; j+=900) {
+                    exLong = 10000;
+                    exLati = 10000;
+
                     searchStart = mMapView.getMapProjection().fromPixels(i, j);
-                    meanShift(searchStart.longitude, searchStart.latitude, 1000f*(1/level));
+                    meanShift(searchStart.longitude, searchStart.latitude, 1000f);
                 }
             }
-        }*/
+
+            unifyCircles();
+        }
     }
 
     /**
@@ -591,13 +610,14 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 NGeoPoint searchStart;//지도좌표
 
                 matchData();
+                //parseJson();
                 long startTime = System.currentTimeMillis();
 
                 for(int i=0; i<=1100; i+=550) {
                     for(int j=0; j<=1800; j+=900) {
                         //초기 위치를 아주 크게 해서 meanShift의 처음 if에서 걸리지 않게 함
-                        exLong = 10000000;
-                        exLati = 10000000;
+                        exLong = 10000;
+                        exLati = 10000;
 
                         searchStart = mMapView.getMapProjection().fromPixels(i, j);
                         meanShift(searchStart.longitude, searchStart.latitude, 1000f);

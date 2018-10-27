@@ -559,6 +559,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     Random rand = new Random();
                     myRandomNumber = rand.nextInt(0xffffff);
 
+                    //화면에 Hashtag 표시
+                    makeIndex(popular_hash);
+
                     //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
                     if(value >= hashtag_percent) {
                         Point searchStartPixel = new Point(0,0);
@@ -590,6 +593,25 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         } catch (JSONException e){
             e.printStackTrace();
         }
+    }
+
+    //화면에Hashtag표시
+    void makeIndex(String a[]){
+        LayoutInflater inflater=(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v=inflater.inflate(R.layout.activity_pixel,null);
+        ScrollView sv=(ScrollView)v.findViewById(R.id.ScrollView1);
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        String array[] = new String[10];
+        for(int i=0;i<array.length;i++){
+            array[i]=a[i];
+            TextView tv = new TextView(this);
+            tv.setText(a[i]);
+            tv.setBackgroundColor(0x1b207);
+            ll.addView(tv);
+            sv.addView(ll);
+        }
+        setContentView(v);
     }
 
     //HashMap sort by Value (Hashtag Map 정렬)

@@ -11,8 +11,9 @@ import android.widget.TextView;
 public class ListAdapter extends BaseAdapter {
     Context mContext;
     LayoutInflater inflater = null;
-    String[] mHash;
-    int[] mNum;
+    String[] mHash = null;
+    int[] iNum = null;
+    long[] lNum = null;
 
     TextView tv_number;
     TextView tv_hash;
@@ -25,7 +26,21 @@ public class ListAdapter extends BaseAdapter {
     {
         this.mContext = context;
         this.mHash = hashmap;
-        this.mNum = num;
+        this.iNum = num;
+
+        //String 배열 크기
+        for(int i=0;i<hashmap.length;i++) {
+            if(hashmap[i] != null) {
+                nListCount++;
+            }
+        }
+    }
+
+    public ListAdapter(Context context, String[] hashmap, long[] num)
+    {
+        this.mContext = context;
+        this.mHash = hashmap;
+        this.lNum = num;
 
         //String 배열 크기
         for(int i=0;i<hashmap.length;i++) {
@@ -70,7 +85,20 @@ public class ListAdapter extends BaseAdapter {
         //인기 Hashtag 출력
         tv_number.setText(position+1 + ". ");
         tv_hash.setText(mHash[position]);
-        tv_num.setText(mNum[position] + "개");
+
+        //(Popular)int형 배열을 받았을 때
+        if(iNum != null) {
+            tv_num.setText(iNum[position] + "개");
+        }
+        //(Recent)long형 배열을 받았을 때
+        if(lNum != null) {
+            if((lNum[position]/60) == 0) {
+                tv_num.setText(lNum[position] + "분 전");
+            }
+            else {
+                tv_num.setText((lNum[position]/60) + "시간 " + (lNum[position]%60) + "분 전");
+            }
+        }
 
         return convertView;
     }

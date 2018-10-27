@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 
@@ -11,6 +12,7 @@ public class MenuPopup extends Activity {
     String[] popular_hash;
     String[] recent_hash;
     int[] num_popular_hash;
+    long[] num_recent_hash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +24,7 @@ public class MenuPopup extends Activity {
         popular_hash = getIntent.getStringArrayExtra("POPULAR_HASHTAG");
         num_popular_hash = getIntent.getIntArrayExtra("NUM_POPULAR_HASHTAG");
         recent_hash = getIntent.getStringArrayExtra("RECENT_HASHTAG");
+        num_recent_hash = getIntent.getLongArrayExtra("NUM_RECENT_HASHTAG");
     }
 
     public void onClick(View v) {
@@ -32,9 +35,10 @@ public class MenuPopup extends Activity {
             startActivity(intent);
         }
         else if(v.getId() == R.id.recentHashtag) {
-            /*Intent intent = new Intent(this, HashRecentActivity.class);
+            Intent intent = new Intent(this, HashRecentActivity.class);
             intent.putExtra("RECENT_HASHTAG", recent_hash);
-            startActivity(intent);*/
+            intent.putExtra("NUM_RECENT_HASHTAG", num_recent_hash);
+            startActivity(intent);
         }
     }
 }

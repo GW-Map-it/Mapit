@@ -52,8 +52,8 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/button_round"
-            android:textColor="#FFFFFF"
+            android:background="@drawable/button_round_gray"
+            android:textColor="#000000"
             android:text="취소"
             android:onClick="onClick"/>
 
@@ -62,7 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/button_round"
+            android:background="@drawable/button_round_orange"
             android:textColor="#FFFFFF"
             android:text="저장"
             android:onClick="onClick"/>

@@ -25,13 +25,13 @@ public class MenuPopup extends Activity {
     }
 
     public void onClick(View v) {
-        if(v.getId() == R.id.tv_popularHashtag) {
+        if(v.getId() == R.id.popularHashtag) {
             Intent intent = new Intent(this, HashPopularActivity.class);
             intent.putExtra("POPULAR_HASHTAG", popular_hash);
             intent.putExtra("NUM_POPULAR_HASHTAG", num_popular_hash);
             startActivity(intent);
         }
-        else if(v.getId() == R.id.tv_recentHashtag) {
+        else if(v.getId() == R.id.recentHashtag) {
             /*Intent intent = new Intent(this, HashRecentActivity.class);
             intent.putExtra("RECENT_HASHTAG", recent_hash);
             startActivity(intent);*/

@@ -65,18 +65,27 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     private static final String TAG_RESULTS = "result";
     private static final String TAG_TEXT_NUM = "text_num";
+    private static final String TAG_TIME = "time";
     private static final String TAG_LONGITUDE = "longitude";
     private static final String TAG_LATITUDE = "latitude";
     private static final String TAG_HASHTAG = "hashtag";
 
+    private static final int RECENT_TIME = 24;              //최근 24시간 내
+
     private String textNum;
+    private String time;
     private String longitude;
     private String latitude;
     private String hashtag;
 
     HashMap<String, Integer> count_hashtag;
+
+    //인기/최신 해시태그 액티비티에 넘어갈 배열
     String[] popular_hash;
     int[] num_popular_hash;
+    String[] recent_hash;
+    int[] num_recent_hash;
+
     int myRandomNumber;
 
     boolean isInit=false;
@@ -430,6 +439,16 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         popular_hash = new String[10];
         num_popular_hash = new int[10];
+        recent_hash = new String[10];
+        num_recent_hash = new int[10];
+
+        //시간
+        long now = System.currentTimeMillis();
+        //현재 시간
+        Date currentDate = new Date(now);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String current_date = sdf.format(currentDate);
+
 
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
@@ -440,6 +459,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             for (int i = 0; i < location.length(); i++) {
                 JSONObject c = location.getJSONObject(i);
                 textNum = c.optString(TAG_TEXT_NUM);
+                time = c.optString(TAG_TIME);
                 longitude = c.optString(TAG_LONGITUDE);
                 latitude = c.optString(TAG_LATITUDE);
                 hashtag = c.optString(TAG_HASHTAG);
@@ -476,8 +496,24 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             }
                         }
                     }
-                }
 
+                    //해당 게시물의 시간(String >> Date)
+                    try {
+                        Date hashDate = sdf.parse(time);                //해당 게시물의 시간(Date형)
+
+                        long duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60 / 60;
+
+                        if(duration < RECENT_TIME) {
+                            Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + hashtag + ", hashDate(게시물 시간) : " + time);
+
+                            Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "시간 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
+                        }
+                    }
+                    catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
             }
 
             count_hashtag = sortByValue(count_hashtag);

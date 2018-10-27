@@ -207,6 +207,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             intent.putExtra("NUM_RECENT_HASHTAG", num_recent_hash);
             startActivity(intent);
         }
+        else if(v.getId() == R.id.btn_logout) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            Toast.makeText(getApplicationContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
+            this.finish();
+        }
     }
 
     protected void matchData(){ //데이터를 점에 매칭

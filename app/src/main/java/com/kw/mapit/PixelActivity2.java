@@ -432,9 +432,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      * animState : ANIMATION_STATE_STARTED or ANIMATION_STATE_FINISHED
      */
     @Override
-    public void onAnimationStateChange(
-            NMapView arg0, int animType, int animState) {
-        //Log.e(LOG_TAG, "onAnimationStateChange called - not init");
+    public void onAnimationStateChange(NMapView arg0, int animType, int animState)
+    {/**
         if(isInit) {
             Log.e(LOG_TAG, "onAnimationStateChange called");
             int level = mMapController.getZoomLevel();
@@ -453,7 +452,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             }
 
             unifyCircles();
-        }
+        }*/
     }
 
     @Override

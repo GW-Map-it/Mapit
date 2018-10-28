@@ -22,6 +22,9 @@ public class MainActivity extends Activity {
         if(v.getId() == R.id.main_login) {
             goIntent = new Intent(this, LoginActivity.class);
         }
+        else if(v.getId() == R.id.db_making){
+            goIntent = new Intent(this, DataMakingActivity.class);
+        }
         //DB_Connect & Write text
         else if(v.getId() == R.id.db_connect) {
             goIntent = new Intent(this, DbConnectActivity.class);

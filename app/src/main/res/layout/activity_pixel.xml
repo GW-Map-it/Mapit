@@ -39,4 +39,16 @@
         android:src="@drawable/img_btn_addtext"
         android:onClick="onClick"/>
 
+    <ImageButton
+        android:id="@+id/btn_logout"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/img_btn_logout"
+        android:onClick="onClick"/>
+
 </FrameLayout>

@@ -10,33 +10,57 @@
     android:padding="20dp"
     tools:context=".MenuPopup">
 
-    <TextView
-        android:id="@+id/tv_popularHashtag"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20dp"
-        android:text="Popular Hastag"
-        android:onClick="onClick"/>
+        android:layout_gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20dp"
-        android:text="==================="
-        android:onClick="onClick"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/seoulnamsan"
+            android:textColor="#FFFFFF"
+            android:textSize="25dp"
+            android:text="Popular Hastag"/>
 
-    <TextView
-        android:id="@+id/tv_recentHashtag"
+        <ImageView
+            android:id="@+id/popularHashtag"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:src="@drawable/img_box_line"
+            android:onClick="onClick"/>
+
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20dp"
-        android:text="Recent Hastag"
-        android:onClick="onClick"/>
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/seoulnamsan"
+            android:textColor="#FFFFFF"
+            android:textSize="25dp"
+            android:text="Recent Hastag"
+            android:onClick="onClick"/>
+
+        <ImageView
+            android:id="@+id/recentHashtag"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:src="@drawable/img_box_line"
+            android:onClick="onClick"/>
+
+    </FrameLayout>
 
 </LinearLayout>

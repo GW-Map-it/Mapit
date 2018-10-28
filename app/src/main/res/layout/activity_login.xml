@@ -61,7 +61,7 @@
         android:id="@+id/btn_login"
         android:layout_width="wrap_content"
         android:layout_height="26dp"
-        android:background="@drawable/button_round"
+        android:background="@drawable/button_round_orange"
         android:text="로그인"
         android:onClick="onClick"/>
 

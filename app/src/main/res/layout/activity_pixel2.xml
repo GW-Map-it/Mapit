@@ -12,10 +12,6 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/MapContainer"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
-
+        android:id="@+id/MapContainer">
     </LinearLayout>
-
 </LinearLayout>

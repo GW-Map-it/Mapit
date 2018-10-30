@@ -42,7 +42,6 @@
             android:hint="HashTag를 입력해주세요\nex) #hashtag1 #hashtag2"
             android:textColorHint="#7F7F7F"
             android:textColor="#000000"/>
-
     </LinearLayout>
 
     <LinearLayout
@@ -56,7 +55,7 @@
             android:id="@+id/button_cancel"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
-            android:background="@drawable/button_round"
+            android:background="@drawable/button_round_gray"
             android:textColor="#FFFFFF"
             android:text="취소"
             android:onClick="onClick"/>
@@ -66,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginRight="15dp"
-            android:background="@drawable/button_round"
+            android:background="@drawable/button_round_orange"
             android:textColor="#FFFFFF"
             android:text="저장"
             android:onClick="onClick"/>

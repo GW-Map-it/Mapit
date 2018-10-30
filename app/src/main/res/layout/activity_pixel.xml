@@ -56,7 +56,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="bottom"
+<<<<<<< HEAD
         android:layout_marginBottom="50dp"
+=======
+        android:layout_marginBottom="70dp"
+>>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
         android:layout_marginLeft="15dp"
         android:id="@+id/parent">
 

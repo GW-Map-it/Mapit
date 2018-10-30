@@ -4,23 +4,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
-<<<<<<< HEAD
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.shapes.Shape;
-=======
-import android.graphics.drawable.GradientDrawable;
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-<<<<<<< HEAD
-import android.widget.FrameLayout;
-=======
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -102,12 +92,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     int myRandomNumber;
 
-<<<<<<< HEAD
-    int tv_index = 1;       //화면에 띄울 hashtag textview의 index
-=======
     LinearLayout container;
 
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
     boolean isInit=false;
 
     JSONArray location = null;
@@ -213,11 +199,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         //register callout overlay listener to customize it.
         mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
-<<<<<<< HEAD
-=======
 
         container = findViewById(R.id.parent);
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
     }
 
     public void onClick(View v) {
@@ -460,11 +443,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     //인기 해시태그 Pick
     protected void getHashtag(float radius) {
-<<<<<<< HEAD
-        LinearLayout container = findViewById(R.id.parent);
-        container.removeAllViews();
-=======
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
         Point outPoint = null;
         count_hashtag = new HashMap<>();
         recent_hashtag = new HashMap<>();
@@ -671,22 +649,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                                 meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                             }
                         }
-<<<<<<< HEAD
-                        setContentView(R.layout.activity_pixel);
-                        GradientDrawable gd = null;
-                        TextView view1 = new TextView(this);
-                        view1.setText(key);
-                        view1.setTextColor(Color.BLACK);
-
-                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        // lp.gravity = Gravity.CENTER;
-                        view1.setLayoutParams(lp);
-
-                        //부모 뷰에 추가
-                        container.addView(view1);
-
-=======
-
 
                         //메인 지도에 Hashtag 표시
                         LinearLayout linear = new LinearLayout(this);
@@ -716,7 +678,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         linear.addView(image);
                         linear.addView(text);
                         container.addView(linear);
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
                     }
                 }
             }
@@ -779,7 +740,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
-        tv_index = 1;
         if(isInit){
 
             float radius=0;
@@ -858,10 +818,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
-<<<<<<< HEAD
-        tv_index = 1;
-=======
->>>>>>> 390b1d4d182025bd46c0590b9f88b8682bc1a194
         onZoomLevelChange(mapview, mMapController.getZoomLevel());
     }
 

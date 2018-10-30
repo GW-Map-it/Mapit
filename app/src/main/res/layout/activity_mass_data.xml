@@ -42,7 +42,6 @@
             android:hint="HashTag를 입력해주세요\nex) #hashtag1 #hashtag2"
             android:textColorHint="#7F7F7F"
             android:textColor="#000000"/>
-
     </LinearLayout>
 
     <LinearLayout

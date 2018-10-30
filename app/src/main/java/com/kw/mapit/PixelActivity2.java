@@ -243,6 +243,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
     }
 
+    //private void int meanShift_count = 10; --> 몇 번 돌아서 종결 조건으로 멈추는지 확인 해보자!
     /**
      * 원의 중심, 원의 반지름, 점의 위치(알고 있음)
      * 중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
@@ -292,15 +293,14 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                         sumLati += Double.parseDouble(latitude);
                     }
                 }
-                exLong = initLong;
-                exLati = initLati;
             }
+            exLong = initLong;
+            exLati = initLati;
             meanShift(sumLong/count, sumLati/count, radius);
         }
         catch (JSONException e){
             e.printStackTrace();
         }
-
     }
 
     /**

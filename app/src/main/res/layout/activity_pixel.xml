@@ -51,4 +51,15 @@
         android:src="@drawable/img_btn_logout"
         android:onClick="onClick"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="50dp"
+        android:layout_marginLeft="15dp"
+        android:id="@+id/parent">
+
+    </LinearLayout>
+
 </FrameLayout>

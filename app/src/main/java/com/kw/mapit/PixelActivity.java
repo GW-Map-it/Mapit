@@ -1,13 +1,21 @@
 package com.kw.mapit;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhn.android.maps.NMapActivity;
@@ -85,6 +93,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     int myRandomNumber;
 
+    int tv_index = 1;       //화면에 띄울 hashtag textview의 index
     boolean isInit=false;
 
     JSONArray location = null;
@@ -190,7 +199,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         //register callout overlay listener to customize it.
         mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
-
     }
 
     public void onClick(View v) {
@@ -433,7 +441,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
     //인기 해시태그 Pick
     protected void getHashtag(float radius) {
-
+        LinearLayout container = findViewById(R.id.parent);
+        container.removeAllViews();
         Point outPoint = null;
         count_hashtag = new HashMap<>();
         recent_hashtag = new HashMap<>();
@@ -547,7 +556,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     }
 
                 }
-                
+
             }
 
             count_hashtag = sortByValue_des(count_hashtag);
@@ -611,39 +620,49 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 int value = count_hashtag.get(key);
                 sum += value;
 
-                if(sum <= total_percent) {
+                if (sum <= total_percent) {
                     //랜덤 색깔(Hashtag별로)
                     Random rand = new Random();
                     myRandomNumber = rand.nextInt(0xffffff);
 
                     //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
-                    if(value >= hashtag_percent) {
-                        Point searchStartPixel = new Point(0,0);
+                    if (value >= hashtag_percent) {
+                        Point searchStartPixel = new Point(0, 0);
                         NGeoPoint searchStart = null;
 
-                        percent = ((double)value / (double)total_sum) * 100; //하나의 해쉬태그가 전체에서 차지하는 비율
+                        percent = ((double) value / (double) total_sum) * 100; //하나의 해쉬태그가 전체에서 차지하는 비율
 
                         Log.e("superdorid", "(15%)" + key + " : " + value + "개, " + percent + "%");
-                        Log.i(LOG_TAG, "percent="+percent);
+                        Log.i(LOG_TAG, "percent=" + percent);
 
                         //Hash Popular로 넘기는 String 배열
                         popular_hash[popular_index] = key;
                         num_popular_hash[popular_index] = value;
                         popular_index++;
 
-                        for(int i=0; i<=1100; i+=1100) {
-                            for(int j=0; j<=1800; j+=900) {
-                                searchStartPixel.set(i,j);
+                        for (int i = 0; i <= 1100; i += 1100) {
+                            for (int j = 0; j <= 1800; j += 900) {
+                                searchStartPixel.set(i, j);
                                 searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
                                 meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                             }
                         }
+                        setContentView(R.layout.activity_pixel);
+                        GradientDrawable gd = null;
+                        TextView view1 = new TextView(this);
+                        view1.setText(key);
+                        view1.setTextColor(Color.BLACK);
+
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        // lp.gravity = Gravity.CENTER;
+                        view1.setLayoutParams(lp);
+
+                        //부모 뷰에 추가
+                        container.addView(view1);
+
                     }
                 }
             }
-
-            //Log.e("superdroid", "========================================hash============================================");
-
         } catch (JSONException e){
             e.printStackTrace();
         }
@@ -703,6 +722,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
+        tv_index = 1;
         if(isInit){
 
             float radius=0;
@@ -781,7 +801,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center) {
-
+        tv_index = 1;
         onZoomLevelChange(mapview, mMapController.getZoomLevel());
     }
 
@@ -961,6 +981,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
                 */
 
+                mMapController.setMapCenter(new NGeoPoint(127.061, 37.51), 11);
                 matchData();
                 getHashtag(1200F); //초기 줌레벨 11이기 때문
             }

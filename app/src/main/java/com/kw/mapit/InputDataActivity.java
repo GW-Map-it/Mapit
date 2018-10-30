@@ -113,7 +113,7 @@ public class InputDataActivity extends AppCompatActivity {
 
             //Insert 사용자 정보
             sbParams = new StringBuffer();
-            sbParams.append("id=").append(userName);
+            sbParams.append("id=").append(userId);
             sbParams.append("&").append("password=").append(userPassword);
             sbParams.append("&").append("name=").append(userName);
             sbParams.append("&").append("sex=").append(userSex);

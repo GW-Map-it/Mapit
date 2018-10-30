@@ -1,17 +1,13 @@
-﻿package com.kw.mapit;
+package com.kw.mapit;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhn.android.maps.NMapActivity;
@@ -79,12 +75,13 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     private String hashtag;
 
     HashMap<String, Integer> count_hashtag;
+    HashMap<String, Long> recent_hashtag;
 
     //인기/최신 해시태그 액티비티에 넘어갈 배열
     String[] popular_hash;
     int[] num_popular_hash;
     String[] recent_hash;
-    int[] num_recent_hash;
+    long[] num_recent_hash;
 
     int myRandomNumber;
 
@@ -206,7 +203,15 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             Intent intent = new Intent(this, MenuPopup.class);
             intent.putExtra("POPULAR_HASHTAG", popular_hash);
             intent.putExtra("NUM_POPULAR_HASHTAG", num_popular_hash);
+            intent.putExtra("RECENT_HASHTAG", recent_hash);
+            intent.putExtra("NUM_RECENT_HASHTAG", num_recent_hash);
             startActivity(intent);
+        }
+        else if(v.getId() == R.id.btn_logout) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            Toast.makeText(getApplicationContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
+            this.finish();
         }
     }
 
@@ -431,16 +436,19 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         Point outPoint = null;
         count_hashtag = new HashMap<>();
+        recent_hashtag = new HashMap<>();
         int total_text_num = 0;
         int total_sum = 0;
         int popular_index = 0;
+        int recent_index = 0;
         double percent;
         double total_percent;
+        long duration = 0;
 
         popular_hash = new String[10];
         num_popular_hash = new int[10];
         recent_hash = new String[10];
-        num_recent_hash = new int[10];
+        num_recent_hash = new long[10];
 
         //시간
         long now = System.currentTimeMillis();
@@ -468,6 +476,22 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
                 //Log.e("superdroid", outPoint.toString());
 
+                //해당 게시물의 시간(String >> Date)
+                try {
+                    Date hashDate = sdf.parse(time);                //해당 게시물의 시간(Date형)
+
+                    duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
+
+                    if(duration < RECENT_TIME) {
+                        Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + hashtag + ", hashDate(게시물 시간) : " + time);
+
+                        Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "분 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
+                    }
+                }
+                catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
                 if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
                     String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
                     total_text_num++;
@@ -475,6 +499,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     //잘라진 hashtag들을 HashMap에 저장
 
                     for(int j=0;j<split_hashtag.length;j++) {
+                        //해시태그 개수 Hashmap
                         Iterator<String> iterator = count_hashtag.keySet().iterator();
                         if(count_hashtag.size() == 0) {
                             count_hashtag.put(split_hashtag[j], 1);
@@ -495,28 +520,38 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                                 }
                             }
                         }
-                    }
 
-                    //해당 게시물의 시간(String >> Date)
-                    try {
-                        Date hashDate = sdf.parse(time);                //해당 게시물의 시간(Date형)
-
-                        long duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60 / 60;
-
-                        if(duration < RECENT_TIME) {
-                            Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + hashtag + ", hashDate(게시물 시간) : " + time);
-
-                            Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "시간 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
+                        //최근 해시태그 Hashmap
+                        Iterator<String> rec_iterator = recent_hashtag.keySet().iterator();
+                        if(recent_hashtag.size() == 0) {
+                            recent_hashtag.put(split_hashtag[j], duration);
+                        }
+                        else {
+                            while (iterator.hasNext()) {
+                                String key = rec_iterator.next();
+                                Long value = recent_hashtag.get(key);
+                                //hashtag와 일치하는 key가 있으면
+                                if (recent_hashtag.containsKey(split_hashtag[j])) {
+                                    if(recent_hashtag.get(split_hashtag[j]) > duration) {           //저장된 시간 >  새로운 시간이면 새로운 시간으로 저장
+                                        recent_hashtag.put(split_hashtag[j], duration);
+                                    }
+                                    break;
+                                }
+                                //hashtag와 일치하는 key가 없으면 HashMap에 추가
+                                else if (!recent_hashtag.containsKey(split_hashtag[j]) && !rec_iterator.hasNext()) {
+                                    recent_hashtag.put(split_hashtag[j], duration);
+                                    break;
+                                }
+                            }
                         }
                     }
-                    catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+
                 }
                 
             }
 
-            count_hashtag = sortByValue(count_hashtag);
+            count_hashtag = sortByValue_des(count_hashtag);
+            recent_hashtag = sortByValue_asc(recent_hashtag);
 
             //HashMap에서 key가 null값인 데이터 삭제
             Iterator<String> remove_iterator = count_hashtag.keySet().iterator();
@@ -525,6 +560,14 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 if (key.equals("")) {
                     remove_iterator.remove();
+                }
+            }
+            Iterator<String> remove_iterator_recent = recent_hashtag.keySet().iterator();
+            while (remove_iterator_recent.hasNext()) {
+                String key = remove_iterator_recent.next();
+
+                if (key.equals("")) {
+                    remove_iterator_recent.remove();
                 }
             }
 
@@ -537,6 +580,20 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 total_sum += value;
 
                 //Log.e("superdorid", key + " : " + value);
+            }
+
+            Iterator<String> it_recent = recent_hashtag.keySet().iterator();
+            while (it_recent.hasNext()) {
+                String key = it_recent.next();
+                Long value = recent_hashtag.get(key);
+
+                if(recent_index >= 0 && recent_index < 10) {
+                    recent_hash[recent_index] = key;
+                    num_recent_hash[recent_index] = value;
+                    recent_index++;
+                }
+
+                //Log.e("superdorid", "(HashMap)RECENT >>>>> key : " + key + " + value : " + value);
             }
 
             //전체 개수의 70%인 hashtag 개수
@@ -558,9 +615,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     //랜덤 색깔(Hashtag별로)
                     Random rand = new Random();
                     myRandomNumber = rand.nextInt(0xffffff);
-
-                    //화면에 Hashtag 표시
-                    makeIndex(popular_hash);
 
                     //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
                     if(value >= hashtag_percent) {
@@ -595,27 +649,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
     }
 
-    //화면에Hashtag표시
-    void makeIndex(String a[]){
-        LayoutInflater inflater=(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v=inflater.inflate(R.layout.activity_pixel,null);
-        ScrollView sv=(ScrollView)v.findViewById(R.id.ScrollView1);
-        LinearLayout ll = new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        String array[] = new String[10];
-        for(int i=0;i<array.length;i++){
-            array[i]=a[i];
-            TextView tv = new TextView(this);
-            tv.setText(a[i]);
-            tv.setBackgroundColor(0x1b207);
-            ll.addView(tv);
-            sv.addView(ll);
-        }
-        setContentView(v);
-    }
-
-    //HashMap sort by Value (Hashtag Map 정렬)
-    public static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hashmap) {
+    //HashMap sort by Value (Hashtag Map 내림차순 정렬)
+    public static HashMap<String, Integer> sortByValue_des(HashMap<String, Integer> hashmap) {
         List<Map.Entry<String, Integer>> list = new LinkedList<>(
                 hashmap.entrySet());
 
@@ -633,6 +668,30 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         HashMap<String, Integer> sortedMap = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
+    }
+
+    //HashMap sort by Value (Hashtag Map 오름차순 정렬)
+    public static HashMap<String, Long> sortByValue_asc(HashMap<String, Long> hashmap) {
+        List<Map.Entry<String, Long>> list = new LinkedList<>(
+                hashmap.entrySet());
+
+        Collections.sort(list, new Comparator<Map.Entry<String, Long>>() {
+            @Override
+            public int compare(Map.Entry<String, Long> o1, Map.Entry<String, Long> o2) {
+                return o1.getValue() < o2.getValue() ? -1 : o1.getValue() > o2.getValue() ? 1:0;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return false;
+            }
+        });
+
+        HashMap<String, Long> sortedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Long> entry : list) {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
         return sortedMap;

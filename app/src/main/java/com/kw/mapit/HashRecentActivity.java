@@ -11,7 +11,7 @@ public class HashRecentActivity extends AppCompatActivity {
 
     Intent getIntent;
     String[] hashtags;
-    int[] num;
+    long[] num;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +23,7 @@ public class HashRecentActivity extends AppCompatActivity {
         //최근 해시태그 받아오기
         getIntent = getIntent();
         hashtags = getIntent.getStringArrayExtra("RECENT_HASHTAG");
-        num = getIntent.getIntArrayExtra("NUM_RECENT_HASHTAG");
+        num = getIntent.getLongArrayExtra("NUM_RECENT_HASHTAG");
 
         listAdapter = new ListAdapter(this, hashtags, num);
         listView.setAdapter(listAdapter);

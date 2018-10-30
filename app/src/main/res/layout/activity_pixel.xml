@@ -14,14 +14,7 @@
         android:orientation="vertical">
 
     </LinearLayout>
-<ScrollView
-        android:id="@+id/ScrollView1"
-        android:clickable="true"
-        android:layout_weight="1"
-        android:layout_width="fill_parent"
-        android:layout_marginBottom="50px"
-        android:layout_height="fill_parent">
-    </ScrollView>
+
     <ImageButton
         android:id="@+id/btn_viewHashtag"
         android:layout_width="50dp"
@@ -46,13 +39,16 @@
         android:src="@drawable/img_btn_addtext"
         android:onClick="onClick"/>
 
-    <ScrollView
-        android:id="@+id/ScrollView1"
-        android:clickable="true"
-        android:layout_weight="1"
-        android:layout_width="fill_parent"
-        android:layout_marginBottom="50px"
-        android:layout_height="fill_parent">
-    </ScrollView>
+    <ImageButton
+        android:id="@+id/btn_logout"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/img_btn_logout"
+        android:onClick="onClick"/>
 
 </FrameLayout>

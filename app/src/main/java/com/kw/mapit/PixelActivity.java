@@ -670,9 +670,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         ImageView image = new ImageView(this);
                         image.setBackgroundResource(R.drawable.imageview_circle);
 
-                        Log.e("superdroid", "Color : " + "#"+String.valueOf(Integer.toHexString(myRandomNumber)) + " / RandomNum : " + myRandomNumber);
+                        Log.e("superdroid", "Color : " + "#"+String.format("#%06X", (0xFFFFFF & myRandomNumber)) + " / RandomNum : " + myRandomNumber);
                         GradientDrawable gd = (GradientDrawable) image.getBackground().getCurrent();
-                        gd.setColor(Color.parseColor("#"+String.valueOf(Integer.toHexString(myRandomNumber))));
+                        gd.setColor(Color.parseColor(String.format("#%06X", (0xFFFFFF & myRandomNumber))));
 
                         //부모 뷰에 추가
                         linear.addView(image);

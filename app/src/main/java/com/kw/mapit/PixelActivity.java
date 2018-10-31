@@ -95,6 +95,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     LinearLayout container;
 
     boolean isInit=false;
+    boolean isCircle = false;           //원이 그려졌는가
 
     JSONArray location = null;
 
@@ -351,6 +352,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             circleStyle.setStrokeColor(myRandomNumber,0xaa);
                             circleData.setCircleStyle(circleStyle);
 
+                            //출력 원의 개수
+                            if(circleData.count() != 0) {
+                                isCircle = true;
+                            }
+
                             //centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
                             //centerIndex++;
 
@@ -467,6 +473,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         String current_date = sdf.format(currentDate);
 
         container.removeAllViews();                     //이전 동적 TextView 삭제
+        isCircle = false;
 
 
         try {
@@ -649,35 +656,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                                 meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                             }
                         }
-
-                        //메인 지도에 Hashtag 표시
-                        LinearLayout linear = new LinearLayout(this);
-                        LayoutParams lp = new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        lp.topMargin = 15;
-                        linear.setOrientation(LinearLayout.HORIZONTAL);
-                        linear.setGravity(Gravity.CENTER_VERTICAL);
-                        linear.setBackgroundResource(R.drawable.linearlayout_hashtag_round);
-                        linear.setLayoutParams(lp);
-
-                        TextView text = new TextView(this);
-                        text.setText(key);
-                        text.setTextColor(Color.BLACK);
-                        text.setTextSize(20);
-                        ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        marginParams.setMargins(15, 0, 0, 0);
-                        text.setLayoutParams(new LinearLayout.LayoutParams(marginParams));
-
-                        ImageView image = new ImageView(this);
-                        image.setBackgroundResource(R.drawable.imageview_circle);
-
-                        Log.e("superdroid", "Color : " + "#"+String.format("#%06X", (0xFFFFFF & myRandomNumber)) + " / RandomNum : " + myRandomNumber);
-                        GradientDrawable gd = (GradientDrawable) image.getBackground().getCurrent();
-                        gd.setColor(Color.parseColor(String.format("#%06X", (0xFFFFFF & myRandomNumber))));
-
-                        //부모 뷰에 추가
-                        linear.addView(image);
-                        linear.addView(text);
-                        container.addView(linear);
+                        //출력 원이 1개 이상이면 Hashtag 화면에 출력
+                        if(isCircle == true) {
+                            printHashtag(key);
+                        }
                     }
                 }
             }
@@ -685,6 +667,40 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             e.printStackTrace();
         }
     }
+
+    //메인 지도 하단에 Hashtag 출력
+    private void printHashtag(String hash) {
+        //ImageView & TextView의 부모 뷰
+        LinearLayout linear = new LinearLayout(this);
+        LayoutParams lp = new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = 15;
+        linear.setOrientation(LinearLayout.HORIZONTAL);
+        linear.setGravity(Gravity.CENTER_VERTICAL);
+        linear.setBackgroundResource(R.drawable.linearlayout_hashtag_round);
+        linear.setLayoutParams(lp);
+
+        //원 그리기
+        ImageView image = new ImageView(this);
+        image.setBackgroundResource(R.drawable.imageview_circle);
+        //Log.e("superdroid", "Color : " + "#"+String.format("#%06X", (0xFFFFFF & myRandomNumber)) + " / RandomNum : " + myRandomNumber);
+        GradientDrawable gd = (GradientDrawable) image.getBackground().getCurrent();
+        gd.setColor(Color.parseColor(String.format("#%06X", (0xFFFFFF & myRandomNumber))));
+
+        //Hashtag 출력 textview
+        TextView text = new TextView(this);
+        text.setText(hash);
+        text.setTextColor(Color.BLACK);
+        text.setTextSize(20);
+        ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        marginParams.setMargins(15, 0, 0, 0);
+        text.setLayoutParams(new LinearLayout.LayoutParams(marginParams));
+
+        //부모 뷰에 추가
+        linear.addView(image);
+        linear.addView(text);
+        container.addView(linear);
+    }
+
 
     //HashMap sort by Value (Hashtag Map 내림차순 정렬)
     public static HashMap<String, Integer> sortByValue_des(HashMap<String, Integer> hashmap) {

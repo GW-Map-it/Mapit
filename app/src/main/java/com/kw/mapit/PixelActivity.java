@@ -266,7 +266,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
      * 원과 점 사이의 거리로 원 안의 포함여부 계산한다
      * meanshift로 원 위치 계속 옮기고 마지막 한 번만 그리는 알고리즘
      */
-    protected void meanShift(double initLong, double initLati, float radius, String hash, double percent) {
+    protected void meanShift(double initLong, double initLati, float radius, double percent) {
         double dataDis;
         double sumLong = initLong;         //원 안에 속한 점이면 계속 더해줄 위도
         double sumLati = initLati;         //원 안에 속한 점이면 계속 더해줄 경도
@@ -290,24 +290,19 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     latitude = c.optString(TAG_LATITUDE);
                     hashtag = c.optString(TAG_HASHTAG);
 
-                    if(hashtag.contains(hash)) {
+                    NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                    outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
 
-                        NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                        outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
+                    if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
+                        circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
+                        dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
-                        if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
-                            circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
-                            dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
-
-                            if (dataDis < radius) { //원 안에 있으면
-                                count++;
-                                sumLong = sumLong + Double.parseDouble(longitude);
-                                sumLati = sumLati + Double.parseDouble(latitude);
-                            }
-                        }
+                        if (dataDis < radius) { //원 안에 있으면
+                            count++;
+                            sumLong = sumLong + Double.parseDouble(longitude);
+                            sumLati = sumLati + Double.parseDouble(latitude); }
                     }
                 }
-                /* 여기로 옮겨도 로직에 문제없을까 */
                 sumLong = sumLong / count;
                 sumLati = sumLati / count;
 
@@ -316,9 +311,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                 NMapCircleData circleData = new NMapCircleData(1);
                 if( (sumLong != initLong) || (sumLati != initLati) ) {
                     if( k == location.length() - 1) {
-                        Log.i(LOG_TAG,"centerList size : "+String.valueOf(centerList.size()));
 
-                        if(centerList.size() == 0){ //사이즈 0일 때
+                        if(centerList.size()==0){
                             circleData.initCircleData();
 
                             if(percent>15 && percent<=25){
@@ -340,7 +334,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             }else if(percent>95 && percent<=100){
                                 circleData.addCirclePoint(sumLong , sumLati , radius*1f);
                             }
-
                             circleData.endCircleData();
                             pathDataOverlay.addCircleData(circleData);
 
@@ -352,69 +345,58 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                             circleStyle.setStrokeColor(myRandomNumber,0xaa);
                             circleData.setCircleStyle(circleStyle);
 
-                            //출력 원의 개수
-                            if(circleData.count() != 0) {
-                                isCircle = true;
-                            }
-
-                            //centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
-                            //centerIndex++;
-
-                        } /*else { //사이즈 여러 개 일 때
-
-                            for(int i=0; i<centerList.size(); i++) {
-                                //Log.i(LOG_TAG, "centerList.get.hashtag = "+centerList.get(i).hashtag+", hash = "+hash);
-                                //Log.i(LOG_TAG,"centerList.get.longitude-sumLong = "+String.valueOf(Math.abs(center.longitude - sumLong)));
-                                //if(centerList.get(i).hashtag.contains(hash)){
-
-                                    if(Math.abs(centerList.get(i).longitude - sumLong) > 0.001 && Math.abs(centerList.get(i).latitude - sumLati) > 0.001 ) { //너무 겹치는 원은 안그릴 것
-                                        circleData.initCircleData();
-                                        //circleData.addCirclePoint(sumLong, sumLati, radius); //중심, 반지름 //원생성!!!
-
-           //                            원 크기 데이터의 양에 따라 다르게 해야 함
-           //                            지금 나오는 원 크기를 가장 데이터가 많을 때의 크기(max)로 잡고 더 작아지게 만들어줄 것
-           //                            데이터 양 퍼센테이지. 어차피 15%까지는 나오지 않는다. 15~25, 25~35, 35~45, 45~55, 55~65, 75~85, 85~95. 95~100 총 8개로 구간 나눠서 반지름 정해준다
-                                        Log.i(LOG_TAG,"몇번들어오니"); //들어올 때 그리는거지... 들어올때 그리는거
-
-                                        if(percent>15 && percent<=25){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.3f);
-                                        }else if(percent>25 && percent<=35){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.4f);
-                                        }else if(percent>35 && percent<=45){
-                                            circleData.addCirclePoint(sumLong , sumLati ,radius*0.5f);
-                                        }else if(percent>45 && percent<=55){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.6f);
-                                        }else if(percent>55 && percent<=65){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.65f);
-                                        }else if(percent>65 && percent<=75){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.7f);
-                                        }else if(percent>75 && percent<=85){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.8f);
-                                        }else if(percent>85 && percent<=95){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*0.9f);
-                                        }else if(percent>95 && percent<=100){
-                                            circleData.addCirclePoint(sumLong , sumLati , radius*1f);
-                                        }
-
-                                        circleData.endCircleData();
-                                        pathDataOverlay.addCircleData(circleData);
-
-                                        NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-                                        //랜덤 색깔
-                                        Random rand = new Random();
-                                        int myRandomNumber = rand.nextInt(0xffffff);
-
-                                        //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-                                        //System.out.printf("%x\n",myRandomNumber);
-                                        circleStyle.setFillColor(myRandomNumber,0x22);
-                                        circleStyle.setStrokeColor(myRandomNumber,0xaa);
-                                        circleData.setCircleStyle(circleStyle);
-                                    }
-                                //}
-                            }
                             centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
                             centerIndex++;
-                        }*/
+                        }else{
+                            circleData.initCircleData(); //for문 안에 넣어야되는지 확인
+
+                            for(int i=0; i<centerList.size(); i++){ //있는만큼 무조건 돌려준다, 한 해쉬태그에 대해 6번 먼저 돌고 다음으로 넘어감
+                                if(Math.abs(centerList.get(i).longitude - sumLong) > 0.05 &&
+                                        Math.abs(centerList.get(i).latitude - sumLati) > 0.05) {
+                                    //수정. 처음껀 들어가고 그 다음부터 겹치는 게 안들어가야 하는 것
+
+                                    Log.i(LOG_TAG,"long-sumLong = "+Math.abs(centerList.get(i).longitude - sumLong)
+                                            +"lati-sumLati = "+Math.abs(centerList.get(i).latitude - sumLati));
+
+                                    if(percent>15 && percent<=25){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.3f);
+                                    }else if(percent>25 && percent<=35){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.4f);
+                                    }else if(percent>35 && percent<=45){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.5f);
+                                    }else if(percent>45 && percent<=55){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.6f);
+                                    }else if(percent>55 && percent<=65){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.65f);
+                                    }else if(percent>65 && percent<=75){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.7f);
+                                    }else if(percent>75 && percent<=85){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.8f);
+                                    }else if(percent>85 && percent<=95){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.9f);
+                                    }else if(percent>95 && percent<=100){
+                                        circleData.addCirclePoint(sumLong , sumLati , radius*1f);
+                                    }
+                                }
+                            }
+                            circleData.endCircleData();
+                            pathDataOverlay.addCircleData(circleData);
+
+                            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+
+                            //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+                            //System.out.printf("%x\n",myRandomNumber);
+                            circleStyle.setFillColor(myRandomNumber,0x22);
+                            circleStyle.setStrokeColor(myRandomNumber,0xaa);
+                            circleData.setCircleStyle(circleStyle);
+
+                            centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
+                            centerIndex++;
+                        }
+                        //출력 원의 개수
+                        if(circleData.count() != 0) {
+                            isCircle = true;
+                        }
                     }
                     //circleData.setRendered(true);
                     //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
@@ -649,11 +631,14 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         num_popular_hash[popular_index] = value;
                         popular_index++;
 
+                        centerList.clear();
+                        centerIndex = 0;
+
                         for (int i = 0; i <= 1100; i += 1100) {
                             for (int j = 0; j <= 1800; j += 900) {
                                 searchStartPixel.set(i, j);
                                 searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                                meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
+                                meanShift(searchStart.longitude, searchStart.latitude, radius, percent);
                             }
                         }
                         //출력 원이 1개 이상이면 Hashtag 화면에 출력

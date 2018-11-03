@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -16,6 +18,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
+
+import com.kw.mapit.pixel.LocationData;
+import com.kw.mapit.pixel.LocationDataRequest;
+import com.kw.mapit.pixel.PixelUtil;
 
 import com.nhn.android.maps.NMapActivity;
 import com.nhn.android.maps.NMapController;
@@ -59,30 +65,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class PixelActivity extends NMapActivity implements NMapView.OnMapStateChangeListener {
-    String myJSON;
 
-    //ArrayList<double> centerList = new ArrayList<double>();
+public class PixelActivity extends NMapActivity implements NMapView.OnMapStateChangeListener, LocationDataRequest.OnLocationResponseListener {
+
     ArrayList<DupCenter> centerList = new ArrayList<>(); //겹침원 없게 중심점 모아둘 리스트
-    int centerIndex = 0;
-
-    private static final String TAG_RESULTS = "result";
-    private static final String TAG_TEXT_NUM = "text_num";
-    private static final String TAG_TIME = "time";
-    private static final String TAG_LONGITUDE = "longitude";
-    private static final String TAG_LATITUDE = "latitude";
-    private static final String TAG_HASHTAG = "hashtag";
 
     private static final int RECENT_TIME = 24;              //최근 24시간 내
-
-    private String textNum;
-    private String time;
-    private String longitude;
-    private String latitude;
-    private String hashtag;
-
-    HashMap<String, Integer> count_hashtag;
-    HashMap<String, Long> recent_hashtag;
 
     //인기/최신 해시태그 액티비티에 넘어갈 배열
     String[] popular_hash;
@@ -117,13 +105,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     private NMapPOIdataOverlay mFloatingPOIdataOverlay;
     private NMapPOIitem mFloatingPOIitem;
 
+    private List<LocationData> locationList = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pixel);
-
-        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
-        getData(serverURL);
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -202,6 +189,32 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
 
         container = findViewById(R.id.parent);
+
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation_50.php";
+        //getData(serverURL);
+        LocationDataRequest.run(serverURL, this);
+    }
+
+    /**
+     * 데이터 수신 완료
+     * @param object {@link LocationData} 를 만들 수 있는 JSONObject result
+     */
+    @Override
+    public void onLocationResponse(@NonNull JSONObject object) {
+        locationList.clear();
+
+        JSONArray jsonList = object.optJSONArray("result");
+        Log.i(LOG_TAG,"result = "+jsonList);
+
+        for(int i=0; i<jsonList.length(); i++){
+            JSONObject location = jsonList.optJSONObject(i);
+            if(location != null){
+                LocationData data = new LocationData(location);
+                locationList.add(data);
+
+                //mapView.showPathDataOverlay(data);
+            }
+        }
     }
 
     public void onClick(View v) {
@@ -226,47 +239,15 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
     }
 
-    protected void matchData(){ //데이터를 점에 매칭
-        try {
-            JSONObject jsonObj = new JSONObject(myJSON);
-
-            location = jsonObj.getJSONArray(TAG_RESULTS);
-
-            for(int i=0; i<location.length(); i++) {
-                JSONObject c = location.getJSONObject(i);
-                textNum = c.optString(TAG_TEXT_NUM);
-                longitude = c.optString(TAG_LONGITUDE);
-                latitude = c.optString(TAG_LATITUDE);
-
-                // set path data points
-                NMapPathData pathData = new NMapPathData(1);
-
-                //데이터 위치 점 찍어주는 부분
-                pathData.initPathData();
-                pathData.addPathPoint(Float.parseFloat(longitude), Float.parseFloat(latitude), NMapPathLineStyle.TYPE_SOLID);
-                pathData.addPathPoint(Float.parseFloat(longitude)+0.00001, Float.parseFloat(latitude)+0.00001, 0);
-                pathData.endPathData();
-
-                NMapPathLineStyle pathLineStyle = new NMapPathLineStyle(mMapView.getContext());
-                pathLineStyle.setLineColor(0xA04DD2, 0xff);
-                pathLineStyle.setFillColor(0xFFFFFF,0x00);
-                pathData.setPathLineStyle(pathLineStyle);
-
-                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
-
-                // show all path data
-                // pathDataOverlay.showAllPathData(mMapController.getZoomLevel());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * 원과 점 사이의 거리로 원 안의 포함여부 계산한다
      * meanshift로 원 위치 계속 옮기고 마지막 한 번만 그리는 알고리즘
      */
-    protected void meanShift(double initLong, double initLati, float radius, double percent) {
+    protected void meanShift(double initLong, double initLati, float radius, String hash, double percent) {
+
+        if(locationList.size()==0)
+            return;
+
         double dataDis;
         double sumLong = initLong;         //원 안에 속한 점이면 계속 더해줄 위도
         double sumLati = initLati;         //원 안에 속한 점이면 계속 더해줄 경도
@@ -274,140 +255,102 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         NGeoPoint circleCenter;
         Point outPoint = null;
 
-        try {
-            /* 제이슨 받아오는 부분 matchData 함수랑 겹치는 곳 나중에 빼줄 것
-               일단 혹시 몰라서 놔둠 */
+        for(int i=0; i < locationList.size(); i++) {
+            count = 1;
+            for (LocationData data : locationList) {
 
-            JSONObject jsonObj = new JSONObject(myJSON);
-            location = jsonObj.getJSONArray(TAG_RESULTS);
+                if(data.getHashtag().contains(hash)){
+                    double longitude = data.getLongitude();
+                    double latitude = data.getLatitude();
 
-            for(int k = 0; k < location.length(); k++) {
-                count=1;
-                for (int i = 0; i < location.length(); i++) {
-                    JSONObject c = location.getJSONObject(i);
-                    textNum = c.optString(TAG_TEXT_NUM);
-                    longitude = c.optString(TAG_LONGITUDE);
-                    latitude = c.optString(TAG_LATITUDE);
-                    hashtag = c.optString(TAG_HASHTAG);
-
-                    NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                    NGeoPoint point = new NGeoPoint(longitude,latitude);
                     outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
 
-                    if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
+                    if (PixelUtil.isScreenInside(outPoint)) { //화면 안에 보이는 경우
                         circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
                         dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
                         if (dataDis < radius) { //원 안에 있으면
                             count++;
-                            sumLong = sumLong + Double.parseDouble(longitude);
-                            sumLati = sumLati + Double.parseDouble(latitude); }
-                    }
-                }
-                sumLong = sumLong / count;
-                sumLati = sumLati / count;
-
-                NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
-
-                NMapCircleData circleData = new NMapCircleData(1);
-                if( (sumLong != initLong) || (sumLati != initLati) ) {
-                    if( k == location.length() - 1) {
-
-                        if(centerList.size()==0){
-                            circleData.initCircleData();
-
-                            if(percent>15 && percent<=25){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.3f);
-                            }else if(percent>25 && percent<=35){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.4f);
-                            }else if(percent>35 && percent<=45){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.5f);
-                            }else if(percent>45 && percent<=55){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.6f);
-                            }else if(percent>55 && percent<=65){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.65f);
-                            }else if(percent>65 && percent<=75){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.7f);
-                            }else if(percent>75 && percent<=85){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.8f);
-                            }else if(percent>85 && percent<=95){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*0.9f);
-                            }else if(percent>95 && percent<=100){
-                                circleData.addCirclePoint(sumLong , sumLati , radius*1f);
-                            }
-                            circleData.endCircleData();
-                            pathDataOverlay.addCircleData(circleData);
-
-                            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-
-                            //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-                            //System.out.printf("%x\n",myRandomNumber);
-                            circleStyle.setFillColor(myRandomNumber,0x22);
-                            circleStyle.setStrokeColor(myRandomNumber,0xaa);
-                            circleData.setCircleStyle(circleStyle);
-
-                            centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
-                            centerIndex++;
-                        }else{
-                            circleData.initCircleData(); //for문 안에 넣어야되는지 확인
-
-                            for(int i=0; i<centerList.size(); i++){ //있는만큼 무조건 돌려준다, 한 해쉬태그에 대해 6번 먼저 돌고 다음으로 넘어감
-                                if(Math.abs(centerList.get(i).longitude - sumLong) > 0.05 &&
-                                        Math.abs(centerList.get(i).latitude - sumLati) > 0.05) {
-                                    //수정. 처음껀 들어가고 그 다음부터 겹치는 게 안들어가야 하는 것
-
-                                    Log.i(LOG_TAG,"long-sumLong = "+Math.abs(centerList.get(i).longitude - sumLong)
-                                            +"lati-sumLati = "+Math.abs(centerList.get(i).latitude - sumLati));
-
-                                    if(percent>15 && percent<=25){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.3f);
-                                    }else if(percent>25 && percent<=35){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.4f);
-                                    }else if(percent>35 && percent<=45){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.5f);
-                                    }else if(percent>45 && percent<=55){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.6f);
-                                    }else if(percent>55 && percent<=65){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.65f);
-                                    }else if(percent>65 && percent<=75){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.7f);
-                                    }else if(percent>75 && percent<=85){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.8f);
-                                    }else if(percent>85 && percent<=95){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*0.9f);
-                                    }else if(percent>95 && percent<=100){
-                                        circleData.addCirclePoint(sumLong , sumLati , radius*1f);
-                                    }
-                                }
-                            }
-                            circleData.endCircleData();
-                            pathDataOverlay.addCircleData(circleData);
-
-                            NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
-
-                            //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
-                            //System.out.printf("%x\n",myRandomNumber);
-                            circleStyle.setFillColor(myRandomNumber,0x22);
-                            circleStyle.setStrokeColor(myRandomNumber,0xaa);
-                            circleData.setCircleStyle(circleStyle);
-
-                            centerList.add(centerIndex,new DupCenter(sumLong,sumLati));
-                            centerIndex++;
-                        }
-                        //출력 원의 개수
-                        if(circleData.count() != 0) {
-                            isCircle = true;
+                            sumLong = sumLong + longitude;
+                            sumLati = sumLati + latitude;
                         }
                     }
-                    //circleData.setRendered(true);
-                    //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
                 }
             }
+            sumLong = sumLong / count;
+            sumLati = sumLati / count;
 
-            //Log.i(LOG_TAG,"마지막 중심좌표! = " + sumLong + " , " + sumLati);
+            NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay();
+            NMapCircleData circleData = new NMapCircleData(1);
 
-        } catch (JSONException e){
-            e.printStackTrace();
+            if( (sumLong != initLong) || (sumLati != initLati) ) { //초기 6점의 위치와 다를 때
+                if( i == locationList.size() - 1) { //마지막 번째에 한 번만 그려준다
+
+                    if(centerList.size() == 0){ //리스트에 아무것도 안들어가있을 때
+                        circleData.initCircleData();
+                        circleData.addCirclePoint(sumLong, sumLati, PixelUtil.getCircleRadius(percent, radius));
+                        circleData.endCircleData();
+
+                        pathDataOverlay.addCircleData(circleData);
+
+                        NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+
+                        //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+                        //System.out.printf("%x\n",myRandomNumber);
+                        circleStyle.setFillColor(myRandomNumber,0x22);
+                        circleStyle.setStrokeColor(myRandomNumber,0xaa);
+                        circleData.setCircleStyle(circleStyle);
+
+                        Log.i(LOG_TAG,"11 sumLong = "+sumLong+"sumLati = "+sumLati);
+
+                        centerList.add(new DupCenter(sumLong,sumLati));
+
+                    }else{
+                        //dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+
+                        for(int j=0; i<centerList.size(); j++){ //있는만큼 무조건 돌려준다, 한 해쉬태그에 대해 6번 먼저 돌고 다음으로 넘어감
+                            Log.i(LOG_TAG,"여긴 들어가겟지?"+Math.abs(centerList.get(i).getLati() - sumLati));
+                            if(Math.abs(centerList.get(i).getLong() - sumLong) >= 0.005 &&
+                                    Math.abs(centerList.get(i).getLati() - sumLati) >= 0.005) {
+
+                                Log.i(LOG_TAG,"22 long-sumLong = "+Math.abs(centerList.get(i).getLong() - sumLong)
+                                        +"lati-sumLati = "+Math.abs(centerList.get(i).getLati() - sumLati));
+
+                                circleData.initCircleData(); //for문 안에 넣어야되는지 확인
+
+                                circleData.addCirclePoint(sumLong, sumLati, PixelUtil.getCircleRadius(percent, radius));
+
+                                circleData.endCircleData();
+                                pathDataOverlay.addCircleData(circleData);
+
+                                NMapCircleStyle circleStyle = new NMapCircleStyle(mMapView.getContext());
+
+                                //Log.e(LOG_TAG, "random Hax : " + myRandomNumber);
+                                //System.out.printf("%x\n",myRandomNumber);
+                                circleStyle.setFillColor(myRandomNumber,0x22);
+                                circleStyle.setStrokeColor(myRandomNumber,0xaa);
+                                circleData.setCircleStyle(circleStyle);
+
+                                centerList.add(new DupCenter(sumLong,sumLati));
+                            }
+                        }
+
+
+                        for(int j=0; i<centerList.size(); j++){
+                            Log.i(LOG_TAG,"22");
+                        }
+                    }
+                    //출력 원의 개수
+                    if(circleData.count() != 0) {
+                        isCircle = true;
+                    }
+                }
+                //circleData.setRendered(true);
+                //pathDataOverlay.showAllPathData(mMapController.getZoomLevel()); //줌이랑 센터 영향
+            }
         }
+
     }
 
     /**
@@ -432,8 +375,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     //인기 해시태그 Pick
     protected void getHashtag(float radius) {
         Point outPoint = null;
-        count_hashtag = new HashMap<>();
-        recent_hashtag = new HashMap<>();
+        HashMap<String, Integer> count_hashtag = new HashMap<>();
+        HashMap<String, Long> recent_hashtag = new HashMap<>();
+
         int total_text_num = 0;
         int total_sum = 0;
         int popular_index = 0;
@@ -457,122 +401,78 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         container.removeAllViews();                     //이전 동적 TextView 삭제
         isCircle = false;
 
+        Log.e("superdroid", "========================================hash============================================");
 
-        try {
-            JSONObject jsonObj = new JSONObject(myJSON);
-            location = jsonObj.getJSONArray(TAG_RESULTS);
+        for (LocationData data : locationList) {
+            NGeoPoint point = new NGeoPoint(data.getLongitude(), data.getLatitude());
+            outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
+            //Log.e("superdroid", outPoint.toString());
 
-            Log.e("superdroid", "========================================hash============================================");
+            //해당 게시물의 시간(String >> Date)
+            try {
+                Date hashDate = sdf.parse(data.getTime());                //해당 게시물의 시간(Date형)
 
-            for (int i = 0; i < location.length(); i++) {
-                JSONObject c = location.getJSONObject(i);
-                textNum = c.optString(TAG_TEXT_NUM);
-                time = c.optString(TAG_TIME);
-                longitude = c.optString(TAG_LONGITUDE);
-                latitude = c.optString(TAG_LATITUDE);
-                hashtag = c.optString(TAG_HASHTAG);
+                duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
 
-                NGeoPoint point = new NGeoPoint(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
-                //Log.e("superdroid", outPoint.toString());
+                if(duration < RECENT_TIME) {
+                    Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + data.getHashtag() + ", hashDate(게시물 시간) : " + data.getTime());
+                    Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "분 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
+                }
+            }
+            catch (ParseException e) {
+                e.printStackTrace();
+            }
 
-                //해당 게시물의 시간(String >> Date)
-                try {
-                    Date hashDate = sdf.parse(time);                //해당 게시물의 시간(Date형)
+            if (PixelUtil.isScreenInside(outPoint)) { //화면 안에 보이는 경우
+                total_text_num++;
 
-                    duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
+                for(String hashtag : data.getSplitHashtag()){
 
-                    if(duration < RECENT_TIME) {
-                        Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + hashtag + ", hashDate(게시물 시간) : " + time);
+                    //해시태그 개수
+                    int count = count_hashtag.containsKey(hashtag) ? count_hashtag.get(hashtag) : 0;
+                    count_hashtag.put(hashtag, count + 1);
 
-                        Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "분 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
+                    //최근 해시태그
+                    if(recent_hashtag.containsKey(hashtag)){
+                        if(recent_hashtag.get(hashtag) > duration)
+                            recent_hashtag.put(hashtag, duration);
+                    }else{
+                        recent_hashtag.put(hashtag, duration);
                     }
                 }
-                catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700) { //화면 안에 보이는 경우
-                    String[] split_hashtag = hashtag.split(" #");       //받아온 hashtag들 " #"로 자르기
-                    total_text_num++;
-
-                    //잘라진 hashtag들을 HashMap에 저장
-
-                    for(int j=0;j<split_hashtag.length;j++) {
-                        //해시태그 개수 Hashmap
-                        Iterator<String> iterator = count_hashtag.keySet().iterator();
-                        if(count_hashtag.size() == 0) {
-                            count_hashtag.put(split_hashtag[j], 1);
-                        }
-                        else {
-                            while (iterator.hasNext()) {
-                                String key = iterator.next();
-                                int value = count_hashtag.get(key);
-                                //hashtag와 일치하는 key가 있으면 value+1
-                                if (count_hashtag.containsKey(split_hashtag[j])) {
-                                    count_hashtag.put(split_hashtag[j], count_hashtag.get(split_hashtag[j]) + 1);
-                                    break;
-                                }
-                                //hashtag와 일치하는 key가 없으면 HashMap에 추가
-                                else if (!count_hashtag.containsKey(split_hashtag[j]) && !iterator.hasNext()) {
-                                    count_hashtag.put(split_hashtag[j], 1);
-                                    break;
-                                }
-                            }
-                        }
-
-                        //최근 해시태그 Hashmap
-                        Iterator<String> rec_iterator = recent_hashtag.keySet().iterator();
-                        if(recent_hashtag.size() == 0) {
-                            recent_hashtag.put(split_hashtag[j], duration);
-                        }
-                        else {
-                            while (iterator.hasNext()) {
-                                String key = rec_iterator.next();
-                                Long value = recent_hashtag.get(key);
-                                //hashtag와 일치하는 key가 있으면
-                                if (recent_hashtag.containsKey(split_hashtag[j])) {
-                                    if(recent_hashtag.get(split_hashtag[j]) > duration) {           //저장된 시간 >  새로운 시간이면 새로운 시간으로 저장
-                                        recent_hashtag.put(split_hashtag[j], duration);
-                                    }
-                                    break;
-                                }
-                                //hashtag와 일치하는 key가 없으면 HashMap에 추가
-                                else if (!recent_hashtag.containsKey(split_hashtag[j]) && !rec_iterator.hasNext()) {
-                                    recent_hashtag.put(split_hashtag[j], duration);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                }
-
             }
+        }
 
-            count_hashtag = sortByValue_des(count_hashtag);
-            recent_hashtag = sortByValue_asc(recent_hashtag);
+        count_hashtag = sortByValue_des(count_hashtag);
+        recent_hashtag = sortByValue_asc(recent_hashtag);
 
-            //HashMap에서 key가 null값인 데이터 삭제
-            Iterator<String> remove_iterator = count_hashtag.keySet().iterator();
-            while (remove_iterator.hasNext()) {
-                String key = remove_iterator.next();
+        //HashMap에서 key가 null값인 데이터 삭제
+        count_hashtag.remove("");
+        recent_hashtag.remove("");
 
-                if (key.equals("")) {
-                    remove_iterator.remove();
-                }
+        /*
+        Iterator<String> remove_iterator = count_hashtag.keySet().iterator();
+        while (remove_iterator.hasNext()) {
+            String key = remove_iterator.next();
+
+            if (key.equals("")) {
+                remove_iterator.remove();
             }
-            Iterator<String> remove_iterator_recent = recent_hashtag.keySet().iterator();
-            while (remove_iterator_recent.hasNext()) {
-                String key = remove_iterator_recent.next();
+        }
+        Iterator<String> remove_iterator_recent = recent_hashtag.keySet().iterator();
+        while (remove_iterator_recent.hasNext()) {
+            String key = remove_iterator_recent.next();
 
-                if (key.equals("")) {
-                    remove_iterator_recent.remove();
-                }
+            if (key.equals("")) {
+                remove_iterator_recent.remove();
             }
+        }
+        */
 
-            //전체 HashMap Log에 출력
+        //전체 HashMap Log에 출력
+        if(count_hashtag.size() > 0 ){
             Iterator<String> it = count_hashtag.keySet().iterator();
+
             while (it.hasNext()) {
                 String key = it.next();
                 int value = count_hashtag.get(key);
@@ -581,7 +481,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 //Log.e("superdorid", key + " : " + value);
             }
-
+        }
+        if(recent_hashtag.size() > 0){
             Iterator<String> it_recent = recent_hashtag.keySet().iterator();
             while (it_recent.hasNext()) {
                 String key = it_recent.next();
@@ -595,61 +496,59 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 //Log.e("superdorid", "(HashMap)RECENT >>>>> key : " + key + " + value : " + value);
             }
+        }
 
-            //전체 개수의 70%인 hashtag 개수
-            total_percent = total_sum * 0.7;
-            double hashtag_percent = total_sum * 0.15;
 
-            //Log.e("superdroid", "탐색 게시물 수 : " + total_text_num);
-            //Log.e("superdroid", "Hashtag 개수(total_sum) : " + total_sum + "개 / 전체 Hashtag의 70% : " + total_percent + "개");
-            //Log.e("superdroid", "전체 Hashtag의 15% : " + hashtag_percent + "개");
+        //전체 개수의 70%인 hashtag 개수
+        total_percent = total_sum * 0.7;
+        double hashtag_percent = total_sum * 0.15;
 
-            int sum = 0;
-            Iterator<String> seventy_it = count_hashtag.keySet().iterator();
-            while (seventy_it.hasNext()) {
-                String key = seventy_it.next();
-                int value = count_hashtag.get(key);
-                sum += value;
+        //Log.e("superdroid", "탐색 게시물 수 : " + total_text_num);
+        //Log.e("superdroid", "Hashtag 개수(total_sum) : " + total_sum + "개 / 전체 Hashtag의 70% : " + total_percent + "개");
+        //Log.e("superdroid", "전체 Hashtag의 15% : " + hashtag_percent + "개");
 
-                if (sum <= total_percent) {
-                    //랜덤 색깔(Hashtag별로)
-                    Random rand = new Random();
-                    myRandomNumber = rand.nextInt(0xffffff);
+        int sum = 0;
+        Iterator<String> seventy_it = count_hashtag.keySet().iterator();
+        while (seventy_it.hasNext()) {
+            String key = seventy_it.next();
+            int value = count_hashtag.get(key);
+            sum += value;
 
-                    //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
-                    if (value >= hashtag_percent) {
-                        Point searchStartPixel = new Point(0, 0);
-                        NGeoPoint searchStart = null;
+            if (sum <= total_percent) {
+                //랜덤 색깔(Hashtag별로)
+                Random rand = new Random();
+                myRandomNumber = rand.nextInt(0xffffff);
 
-                        percent = ((double) value / (double) total_sum) * 100; //하나의 해쉬태그가 전체에서 차지하는 비율
+                //해당 hashtag가 전체 개수의 15%이상이면 >> 최종 인기 Hashtag
+                if (value >= hashtag_percent) {
+                    Point searchStartPixel = new Point(0, 0);
+                    NGeoPoint searchStart = null;
 
-                        Log.e("superdorid", "(15%)" + key + " : " + value + "개, " + percent + "%");
-                        Log.i(LOG_TAG, "percent=" + percent);
+                    percent = ((double) value / (double) total_sum) * 100; //하나의 해쉬태그가 전체에서 차지하는 비율
 
-                        //Hash Popular로 넘기는 String 배열
-                        popular_hash[popular_index] = key;
-                        num_popular_hash[popular_index] = value;
-                        popular_index++;
+                    Log.e("superdorid", "(15%)" + key + " : " + value + "개, " + percent + "%");
 
-                        centerList.clear();
-                        centerIndex = 0;
+                    //Hash Popular로 넘기는 String 배열
+                    popular_hash[popular_index] = key;
+                    num_popular_hash[popular_index] = value;
+                    popular_index++;
 
-                        for (int i = 0; i <= 1100; i += 1100) {
-                            for (int j = 0; j <= 1800; j += 900) {
-                                searchStartPixel.set(i, j);
-                                searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                                meanShift(searchStart.longitude, searchStart.latitude, radius, percent);
-                            }
+                    centerList.clear();
+
+                    for (int i = 0; i <= 1200; i += 1100) {
+                        for (int j = 0; j <= 1900; j += 900) {
+                            searchStartPixel.set(i, j);
+                            searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
+                            meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                         }
-                        //출력 원이 1개 이상이면 Hashtag 화면에 출력
-                        if(isCircle == true) {
-                            printHashtag(key);
-                        }
+                    }
+
+                    //출력 원이 1개 이상이면 Hashtag 화면에 출력
+                    if(isCircle == true) {
+                        printHashtag(key);
                     }
                 }
             }
-        } catch (JSONException e){
-            e.printStackTrace();
         }
     }
 
@@ -743,66 +642,17 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     public void onZoomLevelChange(NMapView mapview, int level) {
         if(isInit){
 
-            float radius=0;
-            float meters;
+            float radius;
 
             mapview.getOverlays().clear();
 
             centerList.clear();
-            centerIndex = 0;
 
-            switch(level){
-                case 1:
-                    Log.i(LOG_TAG,"줌을 줄여주세요~><");
-                    break;
-                case 2:
-                    //radius = 710000F;
-                    Log.i(LOG_TAG, "줌을 더 줄여주세요~!>_<");
-                    break;
-                case 3:
-                    radius = 300000F;
-                    break;
-                case 4:
-                    radius = 150000F;
-                    break;
-                case 5:
-                    radius = 70000F;
-                    break;
-                case 6:
-                    radius = 38000F;
-                    break;
-                case 7:
-                    radius = 18000F;
-                    break;
-                case 8:
-                    radius = 9000F;
-                    break;
-                case 9:
-                    radius = 4500F;
-                    break;
-                case 10:
-                    radius = 2500F;
-                    break;
-                case 11:
-                    radius = 1200F;
-                    break;
-                case 12:
-                    radius = 600F;
-                    break;
-                case 13:
-                    radius = 300F;
-                    break;
-                case 14:
-                    radius = 200F;
-                    break;
-            }
+            radius = PixelUtil.getRadiusByZoomLevel(level);
 
             getHashtag(radius);
 
-            meters = mMapView.getMapProjection().metersToPixels(radius);
-
             Log.i(LOG_TAG, "현재 원크기 = "+radius);
-            Log.i(LOG_TAG, "중심에서 실제거리만큼의 픽셀거리 = "+meters);
             Log.i(LOG_TAG, "zoomLevel = "+level);
             Log.i(LOG_TAG, "Z: center-longitude : " + mapview.getMapController().getMapCenter().longitude);
             Log.i(LOG_TAG, "Z: center-latitude : " + mapview.getMapController().getMapCenter().latitude);
@@ -966,46 +816,4 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             item.setTitle(null);
         }
     };
-    public void getData(String url) {
-        class getDataJSON extends AsyncTask<String, Integer, String> {
-            @Override
-            protected String doInBackground(String... urls) {
-                String uri = urls[0];
-
-                try {
-                    URL url = new URL(uri);
-
-                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                    StringBuilder sb = new StringBuilder();
-
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    String json;
-                    while( (json = bufferedReader.readLine()) != null){
-                        sb.append(json+"\n");
-                    }
-                    return sb.toString().trim();
-                } catch(Exception e) {
-                    return null;
-                }
-            }
-            protected  void onPostExecute(String result) {
-                myJSON = result;
-
-                /* 시간재는 부분
-                long startTime = System.currentTimeMillis();
-                long endTime = System.currentTimeMillis();
-                long Total = endTime - startTime;
-                Log.i(LOG_TAG, "Time : "+Total+" (ms) ");
-                */
-
-                mMapController.setMapCenter(new NGeoPoint(127.061, 37.51), 11);
-                matchData();
-                getHashtag(1200F); //초기 줌레벨 11이기 때문
-            }
-        }
-        getDataJSON g = new getDataJSON();
-        g.execute(url);
-
-    }
-
 }

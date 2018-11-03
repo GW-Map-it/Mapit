@@ -45,7 +45,8 @@
                 android:background="@drawable/img_edittext"
                 android:scaleType="fitCenter"
                 android:textColor="#000000"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:onClick="onClick"/>
         </LinearLayout>
 
         <LinearLayout
@@ -72,7 +73,8 @@
                 android:inputType="textPassword"
                 android:scaleType="fitCenter"
                 android:textColor="#000000"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:onClick="onClick"/>
         </LinearLayout>
 
         <LinearLayout
@@ -98,7 +100,8 @@
                 android:background="@drawable/img_edittext"
                 android:scaleType="fitCenter"
                 android:textColor="#000000"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:onClick="onClick"/>
         </LinearLayout>
 
         <LinearLayout
@@ -106,7 +109,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingBottom="15dp">
+            android:paddingBottom="15dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -120,7 +125,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_gravity="right"
-                android:gravity="right">
+                android:gravity="right"
+                >
 
                 <RadioButton
                     android:id="@+id/rb_male"
@@ -163,7 +169,8 @@
                 android:background="@drawable/img_edittext"
                 android:scaleType="fitCenter"
                 android:textColor="#000000"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:onClick="onClick"/>
 
         </LinearLayout>
 
@@ -190,7 +197,8 @@
                 android:background="@drawable/img_edittext"
                 android:scaleType="fitCenter"
                 android:textColor="#000000"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:onClick="onClick"/>
 
         </LinearLayout>
     </LinearLayout>

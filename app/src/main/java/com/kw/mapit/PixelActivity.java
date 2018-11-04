@@ -85,6 +85,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     boolean isInit=false;
     boolean isCircle = false;           //원이 그려졌는가
 
+    long now;                       //시간
+    Date currentDate;
+    SimpleDateFormat sdf;
+    String current_date;
+
     JSONArray location = null;
 
     // API-KEY
@@ -190,9 +195,14 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
         container = findViewById(R.id.parent);
 
-        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation_50.php";
+        String serverURL = "http://" + getString(R.string.ip) + "/selectLocation.php";
         //getData(serverURL);
         LocationDataRequest.run(serverURL, this);
+
+        //시간
+        now = System.currentTimeMillis();
+        //현재 시간
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
     /**
@@ -259,21 +269,38 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             count = 1;
             for (LocationData data : locationList) {
 
-                if(data.getHashtag().contains(hash)){
+                long duration = -1;
+
+                if(data.getHashtag().contains(" #"+hash)){
                     double longitude = data.getLongitude();
                     double latitude = data.getLatitude();
 
-                    NGeoPoint point = new NGeoPoint(longitude,latitude);
-                    outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
+                    Date hashDate = null;                //해당 게시물의 시간(Date형)
+                    try {
+                        hashDate = sdf.parse(data.getTime());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
 
-                    if (PixelUtil.isScreenInside(outPoint)) { //화면 안에 보이는 경우
-                        circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
-                        dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+                    if(hashDate != null) {
+                        duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
+                    }
 
-                        if (dataDis < radius) { //원 안에 있으면
-                            count++;
-                            sumLong = sumLong + longitude;
-                            sumLati = sumLati + latitude;
+                    if(duration >= 0 /*&& duration <= 60*/) {               //60분 이내 게시물만 탐색
+                        //Log.e("superdroid", "탐색 해시태그 : " + hash + " / 시간 : " + data.getTime());
+
+                        NGeoPoint point = new NGeoPoint(longitude, latitude);
+                        outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
+
+                        if (PixelUtil.isScreenInside(outPoint)) { //화면 안에 보이는 경우
+                            circleCenter = new NGeoPoint((sumLong / count), (sumLati / count));
+                            dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
+
+                            if (dataDis < radius) { //원 안에 있으면
+                                count++;
+                                sumLong = sumLong + longitude;
+                                sumLati = sumLati + latitude;
+                            }
                         }
                     }
                 }
@@ -391,12 +418,8 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         recent_hash = new String[10];
         num_recent_hash = new long[10];
 
-        //시간
-        long now = System.currentTimeMillis();
-        //현재 시간
-        Date currentDate = new Date(now);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String current_date = sdf.format(currentDate);
+        currentDate = new Date(now);                //현재 시간
+        current_date = sdf.format(currentDate);
 
         container.removeAllViews();                     //이전 동적 TextView 삭제
         isCircle = false;
@@ -414,10 +437,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                 duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
 
-                if(duration < RECENT_TIME) {
+                /*if(duration < RECENT_TIME) {
                     Log.e("superdroid", "current(현재 시간) : " + current_date + " / Hashtag : " + data.getHashtag() + ", hashDate(게시물 시간) : " + data.getTime());
                     Log.e("superdroid", "Duration(현재시간-게시물 시간) : " + duration + "분 / currentDate : " + currentDate.getTime() + " / hashDate : " + hashDate.getTime());
-                }
+                }*/
             }
             catch (ParseException e) {
                 e.printStackTrace();

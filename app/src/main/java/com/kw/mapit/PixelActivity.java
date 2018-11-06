@@ -1,13 +1,17 @@
 package com.kw.mapit;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,7 +28,9 @@ import com.kw.mapit.pixel.LocationDataRequest;
 import com.kw.mapit.pixel.PixelUtil;
 
 import com.nhn.android.maps.NMapActivity;
+import com.nhn.android.maps.NMapCompassManager;
 import com.nhn.android.maps.NMapController;
+import com.nhn.android.maps.NMapLocationManager;
 import com.nhn.android.maps.NMapOverlay;
 import com.nhn.android.maps.NMapOverlayItem;
 import com.nhn.android.maps.NMapView;
@@ -39,6 +45,7 @@ import com.nhn.android.maps.overlay.NMapPathData;
 import com.nhn.android.maps.overlay.NMapPathLineStyle;
 import com.nhn.android.mapviewer.overlay.NMapCalloutCustomOverlay;
 import com.nhn.android.mapviewer.overlay.NMapCalloutOverlay;
+import com.nhn.android.mapviewer.overlay.NMapMyLocationOverlay;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
@@ -71,6 +78,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     ArrayList<DupCenter> centerList = new ArrayList<>(); //겹침원 없게 중심점 모아둘 리스트
 
     private static final int RECENT_TIME = 24;              //최근 24시간 내
+    final int PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION = 1;          //위치 권한
 
     //인기/최신 해시태그 액티비티에 넘어갈 배열
     String[] popular_hash;
@@ -111,6 +119,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     private NMapPOIitem mFloatingPOIitem;
 
     private List<LocationData> locationList = new ArrayList<>();
+
+    private NMapMyLocationOverlay mMyLocationOverlay;
+    private NMapLocationManager mMapLocationManager;
+    private NMapCompassManager mMapCompassManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -203,6 +215,14 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         now = System.currentTimeMillis();
         //현재 시간
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        //Location 권한 받기
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION);
+        }
     }
 
     /**
@@ -228,8 +248,17 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     }
 
     public void onClick(View v) {
+        if(v.getId() == R.id.btn_getLocation) {         //현재 위치로 이동
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                        PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION);
+            } else {
+                startMyLocation();
+            }
+        }
         //"+"버튼 클릭 시 게시글 작성 액티비티로 이동
-        if(v.getId() == R.id.btn_addText) {
+        else if(v.getId() == R.id.btn_addText) {
             Intent intent = new Intent(this, DbConnectActivity.class);
             startActivity(intent);
         }
@@ -286,7 +315,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                         duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
                     }
 
-                    if(duration >= 0 /*&& duration <= 60*/) {               //60분 이내 게시물만 탐색
+                    if(duration >= 0 /* && duration <= 60*/) {               //60분 이내 게시물만 탐색
                         //Log.e("superdroid", "탐색 해시태그 : " + hash + " / 시간 : " + data.getTime());
 
                         NGeoPoint point = new NGeoPoint(longitude, latitude);
@@ -656,6 +685,82 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
         return sortedMap;
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        if(requestCode == PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)        //위치 권한 설정 성공
+            {
+                Log.e("GPS Permission", "Location Permission Success");
+                startMyLocation();          //현재 위치로 이동
+            }
+
+            else        //위치 권한 설정 실패
+            {
+                Log.e("GPS Permission", "Location Permission Failed");
+                /*Intent goToSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(goToSettings);
+                finish();*/
+            }
+            return;
+        }
+
+    }
+
+    private void startMyLocation() {            //내 위치로 이동
+        mMapLocationManager = new NMapLocationManager(this);
+        mMapLocationManager.setOnLocationChangeListener(onMyLocationChangeListener);
+
+        boolean isMyLocationEnabled = mMapLocationManager.enableMyLocation(true);
+        if (!isMyLocationEnabled) {
+            Toast.makeText(getApplicationContext(), "위치 권한 설정이 필요합니다.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void stopMyLocation() {
+        if (mMyLocationOverlay != null) {
+            mMapLocationManager.disableMyLocation();
+
+            if (mMapView.isAutoRotateEnabled()) {
+                mMyLocationOverlay.setCompassHeadingVisible(false);
+                mMapCompassManager.disableCompass();
+                mMapView.setAutoRotateEnabled(false, false);
+                MapContainer.requestLayout();
+            }
+        }
+    }
+
+    private final NMapLocationManager.OnLocationChangeListener onMyLocationChangeListener = new NMapLocationManager.OnLocationChangeListener() {
+        @Override
+        public boolean onLocationChanged(NMapLocationManager locationManager, NGeoPoint myLocation) {       //현재 내 위치 변경 시 지도 이동
+			if (mMapController != null) {
+				mMapController.animateTo(myLocation);
+			}
+            //현재 위치로 지도 이동
+            //Log.e("myLog", "CurrentLocation lati : " + myLocation.getLatitude() + "Longi : " + myLocation.getLongitude());
+            //mMapController.setMapCenter(new NGeoPoint(myLocation.getLongitude(), myLocation.getLatitude()), mMapController.getZoomLevel());
+
+            //findPlacemarkAtLocation(myLocation.getLongitude(), myLocation.getLatitude());
+            //위도경도를 주소로 변환
+
+            return true;
+        }
+
+        @Override
+        public void onLocationUpdateTimeout(NMapLocationManager nMapLocationManager) {
+            Toast.makeText(getApplicationContext(), "일시적으로 위치를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
+
+        }
+
+        @Override
+        public void onLocationUnavailableArea(NMapLocationManager nMapLocationManager, NGeoPoint nGeoPoint) {
+            Toast.makeText(getApplicationContext(), "현재 위치를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
+
+            stopMyLocation();
+        }
+    };
 
 
     /**

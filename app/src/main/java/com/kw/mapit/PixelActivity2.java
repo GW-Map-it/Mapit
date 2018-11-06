@@ -54,6 +54,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     String textNum;
     String longitude;
     String latitude;
+    //private void int meanShift_count = 10; --> 몇 번 돌아서 종결 조건으로 멈추는지 확인 해보자!
 
     private int index = 0;
     private double[] longArr = new double[9];
@@ -243,7 +244,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
     }
 
-    //private void int meanShift_count = 10; --> 몇 번 돌아서 종결 조건으로 멈추는지 확인 해보자!
+    private int meanShift_count = 0; //meanShift 무한 루프 방지 횟수 제한
     /**
      * 원의 중심, 원의 반지름, 점의 위치(알고 있음)
      * 중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
@@ -251,7 +252,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      * */
     protected void meanShift(double initLong, double initLati, float radius) {
         //종결 조건
-        if(abs(initLong - exLong) < 0.00001 && abs(initLati - exLati) < 0.00001)
+        if((abs(initLong - exLong) < 0.00001 && abs(initLati - exLati) < 0.00001) || meanShift_count > 50)
         {
             Log.i(LOG_TAG, "initLong = " + initLong + ", exLong = " + exLong + ", initLati = " + initLati + ", exLong = " + exLong);
             //원의 중심을 배열에 추가
@@ -294,6 +295,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                     }
                 }
             }
+            meanShift_count++;
             exLong = initLong;
             exLati = initLati;
             meanShift(sumLong/count, sumLati/count, radius);
@@ -319,11 +321,12 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             NGeoPoint circleCenter1 = new NGeoPoint(longArr[i], latiArr[i]);
             NGeoPoint circleCenter2 = new NGeoPoint(longArr[i + 1], latiArr[i + 1]);
             distance[i] = NGeoPoint.getDistance(circleCenter1, circleCenter2);
+
             float dist = mMapView.getMapProjection().metersToPixels(circleCenter2, (float)distance[i]);
             Log.i(LOG_TAG, "Distance = " + dist);
 
             //비슷한 위치의 원 중 하나의 원만 화면에 출력
-            if (dist > 20)    // meanShift가 제대로 돌아가면 한 20으로 줄여야 될듯.
+            if (dist > 20)
             {
                 drawCircle(longArr[i], latiArr[i], 1000f);
             }
@@ -375,27 +378,76 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         }
     }
 
+    public float level_radius;
     /**
      * 지도 레벨 변경 시 호출되며 변경된 지도 레벨이 파라미터로 전달된다.
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
-        /*if(isInit){
-            mapview.getOverlays().clear();
-
-            NGeoPoint searchStart;
-            matchData();
-
-            for(int i=0; i<=1100; i+=550) {
-                for(int j=0; j<=1800; j+=900) {
-                    searchStart = mMapView.getMapProjection().fromPixels(550, 900);
-                    meanShift(searchStart.longitude, searchStart.latitude, 1000f*(1/level));
-                }
+        if(isInit){
+            switch(level){
+                case 1:
+                    Log.i(LOG_TAG,"줌을 줄여주세요~><");
+                    break;
+                case 2:
+                    //radius = 710000F;
+                    Log.i(LOG_TAG, "줌을 더 줄여주세요~!>_<");
+                    break;
+                case 3:
+                    level_radius = 300000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 4:
+                    level_radius = 150000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 5:
+                    level_radius = 70000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 6:
+                    level_radius = 38000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 7:
+                    level_radius = 18000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 8:
+                    level_radius = 9000F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 9:
+                    level_radius = 4500F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 10:
+                    level_radius = 2500F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 11:
+                    level_radius = 1200F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 12:
+                    level_radius = 600F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 13:
+                    level_radius = 300F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
+                case 14:
+                    level_radius = 200F;
+                    Log.i(LOG_TAG,"radius == " + level_radius);
+                    break;
             }
-        }*/
 
-        if(isInit) {
-            Log.e(LOG_TAG, "onZoomLevelChange called");
+            Log.i(LOG_TAG, "현재 원크기 = "+level_radius);
+            //Log.i(LOG_TAG, "중심에서 실제거리만큼의 픽셀거리 = "+meters);
+            Log.i(LOG_TAG, "zoomLevel = "+level);
+            Log.i(LOG_TAG, "Z: center-longitude : " + mapview.getMapController().getMapCenter().longitude);
+            Log.i(LOG_TAG, "Z: center-latitude : " + mapview.getMapController().getMapCenter().latitude);
         }
     }
 
@@ -404,11 +456,11 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      */
     @Override
     public void onMapCenterChange(NMapView mapview, NGeoPoint center)
-    {/**
+    {
         if(isInit){
             Log.e(LOG_TAG, "onCenterChange called");
-            int level = mMapController.getZoomLevel();
-            //mapview.getOverlays().clear();
+            int level = mMapController.getZoomLevel(); //level(1~14) 커질수록 화면에 가까이감. --> 커질수록 픽셀당 미터 작아짐
+            mapview.getOverlays().clear();
 
             NGeoPoint searchStart;
 
@@ -416,14 +468,15 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 for(int j=0; j<=1800; j+=900) {
                     exLong = 10000;
                     exLati = 10000;
+                    meanShift_count = 0;
 
                     searchStart = mMapView.getMapProjection().fromPixels(i, j);
-                    meanShift(searchStart.longitude, searchStart.latitude, 1000f);
+                    meanShift(searchStart.longitude, searchStart.latitude, level_radius);
                 }
             }
 
             unifyCircles();
-        }*/Log.e(LOG_TAG, "onCenterChange called");
+        }
     }
 
     /**
@@ -623,14 +676,19 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
                 long startTime = System.currentTimeMillis();
 
+                //초기 radius 지정
+                level_radius=500f;
+                onZoomLevelChange(mMapView, mMapController.getZoomLevel());
+
                 for(int i=0; i<=1100; i+=550) {
                     for(int j=0; j<=1800; j+=900) {
                         //초기 위치를 아주 크게 해서 meanShift의 처음 if에서 걸리지 않게 함
                         exLong = 10000;
                         exLati = 10000;
+                        meanShift_count = 0;
 
                         searchStart = mMapView.getMapProjection().fromPixels(i, j);
-                        meanShift(searchStart.longitude, searchStart.latitude, 1000f);
+                        meanShift(searchStart.longitude, searchStart.latitude, level_radius);
                     }
                 }
                 unifyCircles();

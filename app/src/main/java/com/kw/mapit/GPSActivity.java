@@ -1,27 +1,16 @@
 package com.kw.mapit;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.nhn.android.maps.NMapActivity;
 import com.nhn.android.maps.NMapCompassManager;
 import com.nhn.android.maps.NMapController;
@@ -52,11 +41,23 @@ public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChan
     private NMapLocationManager mMapLocationManager;
     private NMapCompassManager mMapCompassManager;
 
+    final int PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps);
+
+        //Location 권한 받기
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION);
+        }
+
+
 
         // 네이버 지도를 넣기 위한 LinearLayout 컴포넌트
         MapContainer = (LinearLayout) findViewById(R.id.MapContainer);
@@ -94,12 +95,55 @@ public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChan
     @Override
     public void onMapInitHandler(NMapView nMapView, NMapError nMapError) {
         if (nMapError == null) { // success
-            startMyLocation();//현재위치로 이동
+
             // mMapController.setMapCenter(new NGeoPoint(126.978371,
             // 37.5666091),
             // 11);
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error=" + nMapError.toString());
+        }
+
+    }
+
+    @Override
+    public void onMapCenterChange(NMapView nMapView, NGeoPoint nGeoPoint) {
+
+    }
+
+    @Override
+    public void onMapCenterChangeFine(NMapView nMapView) {
+
+    }
+
+    @Override
+    public void onZoomLevelChange(NMapView nMapView, int i) {
+
+    }
+
+    @Override
+    public void onAnimationStateChange(NMapView nMapView, int i, int i1) {
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        if(requestCode == PERMISSION_ACCESS_FINE_LOCATION_AND_COARSE_LOCATION)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)        //위치 권한 설정 성공
+            {
+                Log.e("GPS Permission", "Location Permission Success");
+                startMyLocation();          //현재 위치로 이동
+            }
+
+            else        //위치 권한 설정 실패
+            {
+                Log.e("GPS Permission", "Location Permission Failed");
+                Intent goToSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(goToSettings);
+                finish();
+            }
+            return;
         }
 
     }
@@ -112,8 +156,7 @@ public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChan
         if (!isMyLocationEnabled) {
             Toast.makeText(this, "Please enable a My Location source in system settings", Toast.LENGTH_LONG).show();
 
-            Intent goToSettings = new Intent(
-                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            Intent goToSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(goToSettings);
             finish();
 
@@ -161,8 +204,7 @@ public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChan
 //				mMapController.animateTo(myLocation);
 //			}
             //현재 위치로 지도 이동
-            Log.e("myLog", "===========================myLocation  lat " + myLocation.getLatitude());
-            Log.e("myLog", "=====================================myLocation  lng " + myLocation.getLongitude());
+            Log.e("myLog", "CurrentLocation lati : " + myLocation.getLatitude() + "Longi : " + myLocation.getLongitude());
             mMapController.setMapCenter(
                     new NGeoPoint(myLocation.getLongitude(), myLocation.getLatitude()), mMapController.getZoomLevel());
 
@@ -174,38 +216,17 @@ public class GPSActivity extends NMapActivity implements NMapView.OnMapStateChan
 
         @Override
         public void onLocationUpdateTimeout(NMapLocationManager nMapLocationManager) {
-            Toast.makeText(getApplicationContext(), "Your current location is temporarily unavailable.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "일시적으로 위치를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
 
         }
 
         @Override
         public void onLocationUnavailableArea(NMapLocationManager nMapLocationManager, NGeoPoint nGeoPoint) {
-            Toast.makeText(getApplicationContext(), "Your current location is unavailable area.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "현재 위치를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
 
             stopMyLocation();
         }
     };
-
-
-        @Override
-    public void onMapCenterChange(NMapView nMapView, NGeoPoint nGeoPoint) {
-
-    }
-
-    @Override
-    public void onMapCenterChangeFine(NMapView nMapView) {
-
-    }
-
-    @Override
-    public void onZoomLevelChange(NMapView nMapView, int i) {
-
-    }
-
-    @Override
-    public void onAnimationStateChange(NMapView nMapView, int i, int i1) {
-
-    }
 
     @Override
     public NMapCalloutOverlay onCreateCalloutOverlay(NMapOverlay nMapOverlay, NMapOverlayItem nMapOverlayItem, Rect rect) {

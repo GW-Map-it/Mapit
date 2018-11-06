@@ -10,7 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -29,13 +32,13 @@ public class InputDataActivity extends AppCompatActivity {
     private static final String LOG_TAG = "APISigninView";
     StringBuffer sbParams = null;
 
-    TextView tv_signIn;
     EditText loginId;
     EditText loginPassword;
     EditText loginName;
     EditText loginEmail;
     EditText loginAge;
-    RadioGroup loginSex;
+    RadioButton loginMale;
+    RadioButton loginFemale;
 
     String userId;
     String userPassword;
@@ -52,9 +55,10 @@ public class InputDataActivity extends AppCompatActivity {
         loginId = (EditText) findViewById(R.id.ed_api_signin_id);
         loginPassword = (EditText) findViewById(R.id.ed_api_signin_password);
         loginName = (EditText) findViewById(R.id.ed_api_signin_name);
-        loginSex = (RadioGroup) findViewById(R.id.rg_sex);
         loginAge = (EditText) findViewById(R.id.ed_api_signin_age);
         loginEmail = (EditText) findViewById(R.id.ed_api_signin_email);
+        loginMale = (RadioButton)findViewById(R.id.rb_male);
+        loginFemale = (RadioButton)findViewById(R.id.rb_female);
 
         loginName.setText(userName);
         loginEmail.setText(userEmail);
@@ -73,11 +77,84 @@ public class InputDataActivity extends AppCompatActivity {
             Log.e("KakaoLogin", "ID : " + id + " / Name : " + name + " / Email : " + email);
         }
 
+
+        //라디오 버튼 클릭 시 나머지 포커스 out
+        loginMale.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                loginId.setFocusable(false);
+                loginPassword.setFocusable(false);
+                loginName.setFocusable(false);
+                loginAge.setFocusable(false);
+                loginEmail.setFocusable(false);
+
+                //키보드 숨기기(내리기)
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            }
+
+        });
+
+        loginFemale.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                loginId.setFocusable(false);
+                loginPassword.setFocusable(false);
+                loginName.setFocusable(false);
+                loginAge.setFocusable(false);
+                loginEmail.setFocusable(false);
+
+                //키보드 숨기기(내리기)
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
+            }
+
+        });
+
     }
 
     public void onClick(View v) throws ExecutionException, InterruptedException {
+        //EditText 클릭 시 포커스 가져오기 및 키보드 올리기
+        if(v.getId() == R.id.ed_api_signin_id) {
+            loginId.setFocusable(true);
+            loginId.setFocusableInTouchMode(true);
+            loginId.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);       //키보드 올리기
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+        }
+        else if(v.getId() == R.id.ed_api_signin_password) {
+            loginPassword.setFocusable(true);
+            loginPassword.setFocusableInTouchMode(true);
+            loginPassword.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);       //키보드 올리기
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
+        else if(v.getId() == R.id.ed_api_signin_name) {
+            loginName.setFocusable(true);
+            loginName.setFocusableInTouchMode(true);
+            loginName.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);       //키보드 올리기
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
+        else if(v.getId() == R.id.ed_api_signin_age) {
+            loginAge.setFocusable(true);
+            loginAge.setFocusableInTouchMode(true);
+            loginAge.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);       //키보드 올리기
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
+        else if(v.getId() == R.id.ed_api_signin_email) {
+            loginEmail.setFocusable(true);
+            loginEmail.setFocusableInTouchMode(true);
+            loginEmail.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);       //키보드 올리기
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
+
         //Back 버튼 클릭
-        if(v.getId() == R.id.btn_back)
+        else if(v.getId() == R.id.btn_back)
         {
             finish();
             Intent intent = new Intent(this, LoginActivity.class);
@@ -90,14 +167,10 @@ public class InputDataActivity extends AppCompatActivity {
             userId = loginId.getText().toString();
             userPassword = loginPassword.getText().toString();
             userName = loginName.getText().toString();
-            int radioId = loginSex.getCheckedRadioButtonId();
-            RadioButton rb = (RadioButton)findViewById(radioId);
-            if(rb.getText().toString().equals("Male"))
-            {
+            if(loginMale.isChecked()) {
                 userSex = "M";
             }
-            else if(rb.getText().toString().equals("Female"))
-            {
+            else if(loginFemale.isChecked()) {
                 userSex = "F";
             }
 
@@ -128,7 +201,9 @@ public class InputDataActivity extends AppCompatActivity {
                 loginId.setText("");
                 loginPassword.setText("");
                 loginName.setText("");
-                rb.setSelected(false);
+                //rb.setSelected(false);
+                loginMale.setChecked(false);
+                loginFemale.setChecked(false);
                 loginAge.setText("");
                 loginEmail.setText("");
 

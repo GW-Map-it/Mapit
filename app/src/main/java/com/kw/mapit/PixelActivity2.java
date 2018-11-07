@@ -278,7 +278,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      * 중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
      * 작으면 안에 포함되어 있는 점이라고 생각
      * */
-    protected void meanShift(double initLong, double initLati, float radius, String hash, double percent) {
+    protected void meanShift(double initLong, double initLati, float radius, String hash) {
         //종결 조건
         if((abs(initLong - exLong) < 0.00001 && abs(initLati - exLati) < 0.00001) || meanShift_count > 50)
         {
@@ -313,7 +313,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                     outPoint = mMapView.getMapProjection().toPixels(point, outPoint);
                     //Log.i(LOG_TAG, "pixel coor= " + outPoint);
 
-                    if (outPoint.x <= 1650 && outPoint.x >= -550 && outPoint.y >= -900 && outPoint.y <= 2700)  //화면 안에 보이는 경우
+                    if (PixelUtil.isScreenInside(outPoint))  //화면 안에 보이는 경우
                     {
                         dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
@@ -333,20 +333,20 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 {
                     // 화면 중앙에서 탐색 재시작
                     NGeoPoint searchStart = mMapView.getMapProjection().fromPixels(550, 900);
-                    meanShift(searchStart.longitude, searchStart.latitude, radius, hash, percent);
+                    meanShift(searchStart.longitude, searchStart.latitude, radius, hash);
                 }
                 else
                 {
                     exLong = initLong;
                     exLati = initLati;
-                    meanShift(exLong, exLati, radius, hash, percent);
+                    meanShift(exLong, exLati, radius, hash);
                 }
             }
             else
             {
                 exLong = initLong;
                 exLati = initLati;
-                meanShift(sumLong/count, sumLati/count, radius, hash, percent);
+                meanShift(sumLong/count, sumLati/count, radius, hash);
             }
         }
         catch (JSONException e){
@@ -357,12 +357,12 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     /**
      * 9번 meanShift해 찾은 9개의 중심 중 비슷한 위치의 원들을 하나로 통일해 그리는 함수
      */
-    protected void unifyCircles(double percent)
+    protected void unifyCircles(double percent, float radius)
     {
         Log.i(LOG_TAG, "unifyCircles called");
         double[] distance = new double[8];
 
-        drawCircle(longArr[2], latiArr[2], 1000f); //percent로 radius 조절하기
+        drawCircle(longArr[2], latiArr[2], PixelUtil.getCircleRadius(percent, radius)); //percent로 radius 조절하기
 
         //중심이 비슷한 위치에 있음을 판단
         for(int i = 0; i < 5; i++) {
@@ -636,10 +636,10 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
                                 searchStartPixel.set(i, j);
                                 searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                                meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
+                                meanShift(searchStart.longitude, searchStart.latitude, radius, key);
                             }
                         }
-                        unifyCircles(percent);
+                        unifyCircles(percent, radius);
                         printHashtag(key);
                     }
                 }
@@ -731,70 +731,13 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
         return sortedMap;
     }
 
-    public float level_radius;
     /**
      * 지도 레벨 변경 시 호출되며 변경된 지도 레벨이 파라미터로 전달된다.
      */
     @Override
     public void onZoomLevelChange(NMapView mapview, int level) {
         if(isInit){
-            switch(level){
-                case 1:
-                    Log.i(LOG_TAG,"줌을 줄여주세요~><");
-                    break;
-                case 2:
-                    //radius = 710000F;
-                    Log.i(LOG_TAG, "줌을 더 줄여주세요~!>_<");
-                    break;
-                case 3:
-                    level_radius = 300000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 4:
-                    level_radius = 150000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 5:
-                    level_radius = 70000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 6:
-                    level_radius = 38000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 7:
-                    level_radius = 18000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 8:
-                    level_radius = 9000F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 9:
-                    level_radius = 4500F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 10:
-                    level_radius = 2500F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 11:
-                    level_radius = 1200F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 12:
-                    level_radius = 600F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 13:
-                    level_radius = 300F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-                case 14:
-                    level_radius = 200F;
-                    Log.i(LOG_TAG,"radius == " + level_radius);
-                    break;
-            }
+            float level_radius = PixelUtil.getRadiusByZoomLevel(mMapController.getZoomLevel());
 
             Log.i(LOG_TAG, "현재 원크기 = "+level_radius);
             //Log.i(LOG_TAG, "중심에서 실제거리만큼의 픽셀거리 = "+meters);
@@ -812,10 +755,10 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     {
         if(isInit){
             Log.e(LOG_TAG, "onCenterChange called");
-            int level = mMapController.getZoomLevel(); //level(1~14) 커질수록 화면에 가까이감. --> 커질수록 픽셀당 미터 작아짐
             mapview.getOverlays().clear();
 
-            NGeoPoint searchStart;
+            float level_radius = PixelUtil.getRadiusByZoomLevel(mMapController.getZoomLevel());
+            getHashtag(level_radius);
 
             getHashtag(level_radius);
         }
@@ -1019,9 +962,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 long startTime = System.currentTimeMillis();
 
                 //초기 radius 지정
-                level_radius=500f;
-                onZoomLevelChange(mMapView, mMapController.getZoomLevel());
-
+                float level_radius = PixelUtil.getRadiusByZoomLevel(mMapController.getZoomLevel());
                 getHashtag(level_radius);
 
                 long endTime = System.currentTimeMillis();

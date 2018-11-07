@@ -290,11 +290,6 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "] = " + latiArr[index]);
                 index++;
             }
-            else
-            {
-                index = 0;
-                unifyCircles(percent);
-            }
             return;
         }
 
@@ -331,10 +326,28 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                 }
             }
             meanShift_count++;
-            exLong = initLong;
-            exLati = initLati;
 
-            meanShift(sumLong/count, sumLati/count, radius, hash, percent);
+            if(count == 0) // to prevent devide by zero problem
+            {
+                if(exLong == 0 && exLati == 0)  // 초기 위치에서 멈췄을 경우
+                {
+                    // 화면 중앙에서 탐색 재시작
+                    NGeoPoint searchStart = mMapView.getMapProjection().fromPixels(550, 900);
+                    meanShift(searchStart.longitude, searchStart.latitude, radius, hash, percent);
+                }
+                else
+                {
+                    exLong = initLong;
+                    exLati = initLati;
+                    meanShift(exLong, exLati, radius, hash, percent);
+                }
+            }
+            else
+            {
+                exLong = initLong;
+                exLati = initLati;
+                meanShift(sumLong/count, sumLati/count, radius, hash, percent);
+            }
         }
         catch (JSONException e){
             e.printStackTrace();
@@ -626,6 +639,7 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
                                 meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                             }
                         }
+                        unifyCircles(percent);
                         printHashtag(key);
                     }
                 }

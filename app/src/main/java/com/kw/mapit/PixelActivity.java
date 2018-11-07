@@ -166,12 +166,12 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         super.setMapDataProviderListener(onDataProviderListener);
 
         //Markers for POI item
-        int marker1 = NMapPOIflagType.PIN;
+        //int marker1 = NMapPOIflagType.PIN;
 
         // set POI data
         NMapPOIdata poiData = new NMapPOIdata(1, mMapViewerResourceProvider);
 
-        poiData.beginPOIdata(1);
+        /*poiData.beginPOIdata(1);
         NMapPOIitem item = poiData.addPOIitem(null, "Touch & drag to Move", marker1, 0);
         if (item != null) {
             //initialize location to the center of the map view
@@ -187,6 +187,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             mFloatingPOIitem = item;
         }
         poiData.endPOIdata();
+        */
 
         //create POI data overlay
         NMapPOIdataOverlay poiDataOverlay = mOverlayManager.createPOIdataOverlay(poiData, null);
@@ -278,6 +279,32 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         }
     }
 
+    protected void matchData(){ //데이터를 점에 매칭
+
+        for(LocationData data : locationList) {
+            double longitude = data.getLongitude();
+            double latitude = data.getLatitude();
+
+            // set path data points
+            NMapPathData pathData = new NMapPathData(1);
+
+            //데이터 위치 점 찍어주는 부분
+            pathData.initPathData();
+            pathData.addPathPoint(longitude,latitude, NMapPathLineStyle.TYPE_SOLID);
+            pathData.addPathPoint(longitude+0.00001, latitude+0.00001, 0);
+            pathData.endPathData();
+
+            NMapPathLineStyle pathLineStyle = new NMapPathLineStyle(mMapView.getContext());
+            pathLineStyle.setLineColor(0xA04DD2, 0xff);
+            pathLineStyle.setFillColor(0xFFFFFF,0x00);
+            pathData.setPathLineStyle(pathLineStyle);
+
+            NMapPathDataOverlay pathDataOverlay = mOverlayManager.createPathDataOverlay(pathData);
+
+            // show all path data
+            // pathDataOverlay.showAllPathData(mMapController.getZoomLevel());
+        }
+    }
     /**
      * 원과 점 사이의 거리로 원 안의 포함여부 계산한다
      * meanshift로 원 위치 계속 옮기고 마지막 한 번만 그리는 알고리즘
@@ -294,22 +321,22 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         NGeoPoint circleCenter;
         Point outPoint = null;
 
-        for(int i=0; i < locationList.size(); i++) {
+        for(int i = 0; i < locationList.size(); i++) {
             count = 1;
             for (LocationData data : locationList) {
 
-                long duration = -1;
+                long duration = 1;
 
-                if(data.getHashtag().contains(" #"+hash)){
+                if(data.getHashtag().contains(hash)){
                     double longitude = data.getLongitude();
                     double latitude = data.getLatitude();
 
                     Date hashDate = null;                //해당 게시물의 시간(Date형)
-                    try {
+                    /*try {
                         hashDate = sdf.parse(data.getTime());
                     } catch (ParseException e) {
                         e.printStackTrace();
-                    }
+                    }*/
 
                     if(hashDate != null) {
                         duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
@@ -360,18 +387,20 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
                         Log.i(LOG_TAG,"11 sumLong = "+sumLong+"sumLati = "+sumLati);
 
-                        centerList.add(new DupCenter(sumLong,sumLati));
+                        centerList.add(new DupCenter(sumLong,sumLati,hash));
 
                     }else{
                         //dataDis = NGeoPoint.getDistance(point, circleCenter); //원과 점 사이의 거리
 
-                        for(int j=0; i<centerList.size(); j++){ //있는만큼 무조건 돌려준다, 한 해쉬태그에 대해 6번 먼저 돌고 다음으로 넘어감
-                            Log.i(LOG_TAG,"여긴 들어가겟지?"+Math.abs(centerList.get(i).getLati() - sumLati));
-                            if(Math.abs(centerList.get(i).getLong() - sumLong) >= 0.005 &&
-                                    Math.abs(centerList.get(i).getLati() - sumLati) >= 0.005) {
+                        for(int j=0; j<centerList.size(); j++){ //있는만큼 무조건 돌려준다, 한 해쉬태그에 대해 6번 먼저 돌고 다음으로 넘어감
+                            Log.i(LOG_TAG,"여긴 들어가겟지?"+Math.abs(centerList.get(j).getLati() - sumLati));
 
-                                Log.i(LOG_TAG,"22 long-sumLong = "+Math.abs(centerList.get(i).getLong() - sumLong)
-                                        +"lati-sumLati = "+Math.abs(centerList.get(i).getLati() - sumLati));
+                            if(Math.abs(centerList.get(j).getLong() - sumLong) >= 0.005 &&
+                                    Math.abs(centerList.get(j).getLati() - sumLati) >= 0.005 &&
+                                    !centerList.get(j).getHash().contains(hash)) {
+
+                                Log.i(LOG_TAG,"22 long-sumLong = "+Math.abs(centerList.get(j).getLong() - sumLong)
+                                        +"lati-sumLati = "+Math.abs(centerList.get(j).getLati() - sumLati));
 
                                 circleData.initCircleData(); //for문 안에 넣어야되는지 확인
 
@@ -388,12 +417,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                                 circleStyle.setStrokeColor(myRandomNumber,0xaa);
                                 circleData.setCircleStyle(circleStyle);
 
-                                centerList.add(new DupCenter(sumLong,sumLati));
+                                centerList.add(new DupCenter(sumLong,sumLati,hash));
                             }
                         }
 
-
-                        for(int j=0; i<centerList.size(); j++){
+                        for(int j=0; j<centerList.size(); j++){
                             Log.i(LOG_TAG,"22");
                         }
                     }
@@ -421,7 +449,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             mMapController.setMapCenter(
                     new NGeoPoint(127.061, 37.51), 11);
             Log.i(LOG_TAG, "inithandler : zoomlevel = "+mapview.getMapController().getZoomLevel());
-            isInit=true;
+            isInit = true;
+
+            matchData();
+            getHashtag(1200F);
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
                     + errorInfo.toString());
@@ -778,6 +809,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
             radius = PixelUtil.getRadiusByZoomLevel(level);
 
+            matchData();
             getHashtag(radius);
 
             Log.i(LOG_TAG, "현재 원크기 = "+radius);

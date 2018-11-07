@@ -6,8 +6,9 @@ import android.util.Log;
 public class PixelUtil {
 
     public static boolean isScreenInside(Point point){
-        //1100,1800
-        return point.x <= 1350 && point.x >= -250 && point.y >= -600 && point.y <=2100;
+        //화면 크기 : 1100,1800
+        //화면 크기보다 10% 여유 있게 추출
+        return point.x <= 1210 && point.x >= -110 && point.y >= -180 && point.y <=1980;
     }
     public static float getCircleRadius(double percent, float radius){
 

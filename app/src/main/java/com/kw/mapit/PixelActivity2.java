@@ -77,11 +77,10 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
     String latitude;
     String hashtag;
     String time;
-    //private void int meanShift_count = 10; --> 몇 번 돌아서 종결 조건으로 멈추는지 확인 해보자!
 
     private int index = 0;
-    private double[] longArr = new double[9];
-    private double[] latiArr = new double[9];
+    private double[] longArr = new double[6];
+    private double[] latiArr = new double[6];
     private double exLong;
     private double exLati;
 
@@ -279,18 +278,22 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
      * 중심과 반지름 설정해서 점에서 원의 중심까지의 길이가 원의 반지름에서 원의 중심까지의 길이보다
      * 작으면 안에 포함되어 있는 점이라고 생각
      * */
-    protected void meanShift(double initLong, double initLati, float radius, String hash) {
+    protected void meanShift(double initLong, double initLati, float radius, String hash, double percent) {
         //종결 조건
         if((abs(initLong - exLong) < 0.00001 && abs(initLati - exLati) < 0.00001) || meanShift_count > 50)
         {
-            Log.i(LOG_TAG, "initLong = " + initLong + ", exLong = " + exLong + ", initLati = " + initLati + ", exLong = " + exLong);
             //원의 중심을 배열에 추가
-            if(index < 9)
+            if(index < 6)
             {
                 longArr[index] = initLong;
                 latiArr[index] = initLati;
-                //Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "] = " + latiArr[index]);
+                Log.e(LOG_TAG, "Location  ||  longArr[" + index + "] = " + longArr[index] + "   latiArr[" + index + "] = " + latiArr[index]);
                 index++;
+            }
+            else
+            {
+                index = 0;
+                unifyCircles(percent);
             }
             return;
         }
@@ -330,7 +333,8 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
             meanShift_count++;
             exLong = initLong;
             exLati = initLati;
-            meanShift(sumLong/count, sumLati/count, radius, hash);
+
+            meanShift(sumLong/count, sumLati/count, radius, hash, percent);
         }
         catch (JSONException e){
             e.printStackTrace();
@@ -339,17 +343,16 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
     /**
      * 9번 meanShift해 찾은 9개의 중심 중 비슷한 위치의 원들을 하나로 통일해 그리는 함수
-     * (다 그린 후에는 원의 중심을 저장하는 배열의 index를 0으로 초기화)
      */
-    protected void unifyCircles()
+    protected void unifyCircles(double percent)
     {
         Log.i(LOG_TAG, "unifyCircles called");
         double[] distance = new double[8];
 
-        drawCircle(longArr[4], latiArr[4], 1000f);
+        drawCircle(longArr[2], latiArr[2], 1000f); //percent로 radius 조절하기
 
         //중심이 비슷한 위치에 있음을 판단
-        for(int i = 0; i < 8; i++) {
+        for(int i = 0; i < 5; i++) {
             NGeoPoint circleCenter1 = new NGeoPoint(longArr[i], latiArr[i]);
             NGeoPoint circleCenter2 = new NGeoPoint(longArr[i + 1], latiArr[i + 1]);
             distance[i] = NGeoPoint.getDistance(circleCenter1, circleCenter2);
@@ -614,16 +617,15 @@ public class PixelActivity2 extends NMapActivity implements NMapView.OnMapStateC
 
                         for (int i = 0; i <= 1100; i += 1100) {
                             for (int j = 0; j <= 1800; j += 900) {
-                                exLong = 10000;
-                                exLati = 10000;
+                                exLong = 0;
+                                exLati = 0;
                                 meanShift_count = 0;
 
                                 searchStartPixel.set(i, j);
                                 searchStart = mMapView.getMapProjection().fromPixels(searchStartPixel.x, searchStartPixel.y);
-                                meanShift(searchStart.longitude, searchStart.latitude, radius, key);
+                                meanShift(searchStart.longitude, searchStart.latitude, radius, key, percent);
                             }
                         }
-                        unifyCircles();
                         printHashtag(key);
                     }
                 }

@@ -5,6 +5,6 @@
     <string name="kakao_app_key">a2e37856d8dd1758d2b30d7a3179576c</string>
 
     <!-- IP -->
-    <string name="ip">192.168.1.7</string>
+    <string name="ip">192.168.200.117</string>
 
 </resources>

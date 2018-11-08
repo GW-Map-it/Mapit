@@ -98,6 +98,9 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     SimpleDateFormat sdf;
     String current_date;
 
+    double currentLati;
+    double currentLongi;
+
     JSONArray location = null;
 
     // API-KEY
@@ -261,7 +264,11 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         //"+"버튼 클릭 시 게시글 작성 액티비티로 이동
         else if(v.getId() == R.id.btn_addText) {
             Intent intent = new Intent(this, DbConnectActivity.class);
+            Log.e("superdroid", mMapController.getMapCenter().getLatitude()+", "+mMapController.getMapCenter().getLongitude());
+            intent.putExtra("CENTER_LATITUDE", mMapController.getMapCenter().getLatitude());
+            intent.putExtra("CENTER_LONGITUDE", mMapController.getMapCenter().getLongitude());
             startActivity(intent);
+            finish();
         }
         else if(v.getId() == R.id.btn_viewHashtag) {
             Intent intent = new Intent(this, MenuPopup.class);
@@ -332,17 +339,17 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
                     double latitude = data.getLatitude();
 
                     Date hashDate = null;                //해당 게시물의 시간(Date형)
-                    /*try {
+                    try {
                         hashDate = sdf.parse(data.getTime());
                     } catch (ParseException e) {
                         e.printStackTrace();
-                    }*/
+                    }
 
                     if(hashDate != null) {
                         duration = (currentDate.getTime() - hashDate.getTime()) / 1000 / 60;
                     }
 
-                    if(duration >= 0 /* && duration <= 60*/) {               //60분 이내 게시물만 탐색
+                    if(duration >= 0 && duration <= 60) {               //60분 이내 게시물만 탐색
                         //Log.e("superdroid", "탐색 해시태그 : " + hash + " / 시간 : " + data.getTime());
 
                         NGeoPoint point = new NGeoPoint(longitude, latitude);
@@ -446,12 +453,22 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     public void onMapInitHandler(NMapView mapview, NMapError errorInfo) {
 
         if (errorInfo == null) { // success
-            mMapController.setMapCenter(
-                    new NGeoPoint(127.061, 37.51), 11);
+            //새 게시물 작성 후 center 연결
+            Intent getIntent = getIntent();
+            if(getIntent.getExtras() != null) {
+                double lati = getIntent.getExtras().getDouble("CENTER_LATITUDE");
+                double longi = getIntent.getExtras().getDouble("CENTER_LONGITUDE");
+                mMapController.setMapCenter(
+                        new NGeoPoint(longi, lati), 11);
+            }
+            else {
+                mMapController.setMapCenter(
+                        new NGeoPoint(127.061, 37.51), 11);
+            }
             Log.i(LOG_TAG, "inithandler : zoomlevel = "+mapview.getMapController().getZoomLevel());
             isInit = true;
 
-            matchData();
+            //matchData();
             getHashtag(1200F);
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
@@ -731,9 +748,6 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
             else        //위치 권한 설정 실패
             {
                 Log.e("GPS Permission", "Location Permission Failed");
-                /*Intent goToSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(goToSettings);
-                finish();*/
             }
             return;
         }
@@ -743,6 +757,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
     private void startMyLocation() {            //내 위치로 이동
         mMapLocationManager = new NMapLocationManager(this);
         mMapLocationManager.setOnLocationChangeListener(onMyLocationChangeListener);
+        mMapController.setMapCenter(new NGeoPoint(currentLongi, currentLati), mMapController.getZoomLevel());
 
         boolean isMyLocationEnabled = mMapLocationManager.enableMyLocation(true);
         if (!isMyLocationEnabled) {
@@ -767,15 +782,10 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
         @Override
         public boolean onLocationChanged(NMapLocationManager locationManager, NGeoPoint myLocation) {       //현재 내 위치 변경 시 지도 이동
 			if (mMapController != null) {
-				mMapController.animateTo(myLocation);
+				//mMapController.animateTo(myLocation);
+				currentLati = myLocation.getLatitude();
+				currentLongi = myLocation.getLongitude();
 			}
-            //현재 위치로 지도 이동
-            //Log.e("myLog", "CurrentLocation lati : " + myLocation.getLatitude() + "Longi : " + myLocation.getLongitude());
-            //mMapController.setMapCenter(new NGeoPoint(myLocation.getLongitude(), myLocation.getLatitude()), mMapController.getZoomLevel());
-
-            //findPlacemarkAtLocation(myLocation.getLongitude(), myLocation.getLatitude());
-            //위도경도를 주소로 변환
-
             return true;
         }
 
@@ -809,7 +819,7 @@ public class PixelActivity extends NMapActivity implements NMapView.OnMapStateCh
 
             radius = PixelUtil.getRadiusByZoomLevel(level);
 
-            matchData();
+            //matchData();
             getHashtag(radius);
 
             Log.i(LOG_TAG, "현재 원크기 = "+radius);

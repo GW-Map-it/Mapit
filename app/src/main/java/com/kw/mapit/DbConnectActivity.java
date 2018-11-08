@@ -37,6 +37,9 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
     private String latitude = null;
     private String longitude = null;
 
+    double centerLati;
+    double centerLongi;
+
     public static NMapActivity activity_dbConnect;
 
     // API-KEY
@@ -139,6 +142,11 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
 
         //register callout overlay listener to customize it.
         mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
+
+        Intent getIntent = getIntent();
+        centerLati = getIntent.getExtras().getDouble("CENTER_LATITUDE");
+        centerLongi = getIntent.getExtras().getDouble("CENTER_LONGITUDE");
+        Log.e("DbConnect", centerLati + ", " + centerLongi);
     }
 
     /**
@@ -150,7 +158,7 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
     public void onMapInitHandler(NMapView mapview, NMapError errorInfo) {
         if (errorInfo == null) { // success
             mMapController.setMapCenter(
-                    new NGeoPoint(127.061, 37.51), 11);
+                    new NGeoPoint(centerLongi, centerLati), 11);
         } else { // fail
             android.util.Log.e("NMAP", "onMapInitHandler: error="
                     + errorInfo.toString());
@@ -204,6 +212,9 @@ public class DbConnectActivity extends NMapActivity implements NMapView.OnMapSta
             intent = new Intent(DbConnectActivity.this, TextActivity.class);
             intent.putExtra("latitude", latitude);
             intent.putExtra("longitude", longitude);
+            intent.putExtra("CENTER_LATITUDE", mMapController.getMapCenter().getLatitude());
+            intent.putExtra("CENTER_LONGITUDE", mMapController.getMapCenter().getLongitude());
+            Log.e("DbConnect", mMapController.getMapCenter().getLatitude()+", "+mMapController.getMapCenter().getLongitude());
             startActivity(intent);
         }
 

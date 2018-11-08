@@ -40,6 +40,9 @@ public class TextActivity extends Activity {
     private String latitude = null;
     private String longitude = null;
 
+    double centerLati;
+    double centerLongi;
+
     JSONArray users = null;
 
     StringBuffer sbParams = null;
@@ -58,7 +61,9 @@ public class TextActivity extends Activity {
         Intent intent = getIntent();
         latitude = intent.getExtras().getString("latitude");
         longitude = intent.getExtras().getString("longitude");
-
+        centerLati = intent.getExtras().getDouble("CENTER_LATITUDE");
+        centerLongi = intent.getExtras().getDouble("CENTER_LONGITUDE");
+        Log.e("Text", centerLati + ", " + centerLongi);
     }
 
     public void onClick(View v) {
@@ -81,6 +86,9 @@ public class TextActivity extends Activity {
 
                     Intent intent;
                     intent = new Intent(TextActivity.this, PixelActivity.class);
+                    intent.putExtra("CENTER_LATITUDE", centerLati);
+                    intent.putExtra("CENTER_LONGITUDE", centerLongi);
+                    Log.e("Text", "Put : "+centerLati + ", " + centerLongi);
                     startActivity(intent);
                     TextActivity.this.finish();
 
